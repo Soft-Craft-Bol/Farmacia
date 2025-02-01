@@ -1,0 +1,24 @@
+{
+    "development": {
+      "username": "gaspar",
+      "password": "armando1gaspar",
+      "database": "user_db",
+      "host": "localhost",
+      "dialect": "postgres"
+    },
+    "test": {
+      "username": "tu_usuario",
+      "password": "tu_contraseña",
+      "database": "nombre_base_de_datos_test",
+      "host": "localhost",
+      "dialect": "postgres"
+    },
+    "production": {
+      "username": "tu_usuario",
+      "password": "tu_contraseña",
+      "database": "nombre_base_de_datos_production",
+      "host": "localhost",
+      "dialect": "postgres"
+    }
+  }
+  
