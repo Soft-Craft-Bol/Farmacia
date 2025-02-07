@@ -3,16 +3,40 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
 require('dotenv').config();
 
-exports.register = async (req, res) => {
-    const { nombre, apellido, usuario, email, password, ci } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
 
+exports.register = async (req, res) => {
+    const { nombre, apellido, usuario, email, password, ci, profesion, foto, areaId, roleIds } = req.body;
+    
     try {
+        // Hashear contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Crear usuario
         const user = await prisma.user.create({
-            data: { nombre, apellido, usuario, email, password: hashedPassword, ci }
+            data: {
+                nombre,
+                apellido,
+                usuario,
+                email,
+                password: hashedPassword,
+                ci,
+                profesion,
+                foto,
+                areaId,
+                roles: {
+                    create: roleIds.map(roleId => ({
+                        role: { connect: { id: roleId } }
+                    }))
+                }
+            },
+            include: {
+                roles: { include: { role: true } }
+            }
         });
+
         res.json(user);
     } catch (error) {
+        console.error(error);
         res.status(400).json({ error: 'Error al registrar usuario' });
     }
 };

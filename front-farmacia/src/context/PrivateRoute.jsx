@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { isTokenValid } from "../utils/Auth";
 import { getToken } from "../pages/login/authFuntions";
 import { Navigate } from 'react-router-dom';
-import { Sidebar } from "../components/sidebar/SideBar";
+import Sidebar from "../components/sidebar/SideBar";
 
 const PrivateRoute = ({ children }) => {
   const token = getToken();

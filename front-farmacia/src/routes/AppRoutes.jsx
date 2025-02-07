@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import PrivateRoute from "../context/PrivateRoute";
 import LoginUser from "../pages/login/LoginUser";
 import { lazy } from "react";
-import { Sidebar } from "../components/sidebar/SideBar";
+import  Sidebar  from "../components/sidebar/SideBar";
 
 const Home = lazy(() => import("../pages/home/Home"));
 const UserForm = lazy(() => import("../pages/users/RegisterUser"));
