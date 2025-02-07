@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(uuid()) 
+  nombre    String
+  apellido  String
+  usuario   String  @unique
+  email     String  @unique
+  password  String
+  ci        String  @unique
+  item      String?
+  profesion String?
+  foto      String?
+  areaId    Int?
+  area      Area?   @relation(fields: [areaId], references: [id])
+  roles     UserRole[]
+  equipos   UserTeam[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id          Int        @id @default(autoincrement())
+  nombre      String     @unique
+  permisos    RolePermission[]
+  usuarios    UserRole[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Permission {
+  id        Int        @id @default(autoincrement())
+  nombre    String     @unique
+  roles     RolePermission[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model UserRole {
+  id        Int     @id @default(autoincrement())
+  userId    String
+  roleId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  role      Role    @relation(fields: [roleId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, roleId]) // Asegura que un usuario no tenga roles duplicados
+}
+
+model RolePermission {
+  id          Int     @id @default(autoincrement())
+  roleId      Int
+  permissionId Int
+  role        Role    @relation(fields: [roleId], references: [id])
+  permission  Permission @relation(fields: [permissionId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([roleId, permissionId]) // Evita duplicar permisos en un rol
+}
+
+model Area {
+  id        Int       @id @default(autoincrement())
+  nombre    String    @unique
+  usuarios  User[]
+  createdAt DateTime  @default(now())
+}
+
+model Team {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @unique
+  descripcion String?
+  usuarios  UserTeam[]
+  createdAt DateTime @default(now())
+}
+
+model UserTeam {
+  id        Int    @id @default(autoincrement())
+  userId    String
+  teamId    Int
+  user      User  @relation(fields: [userId], references: [id])
+  team      Team  @relation(fields: [teamId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, teamId]) // Evita que un usuario esté duplicado en un equipo
+}
+
