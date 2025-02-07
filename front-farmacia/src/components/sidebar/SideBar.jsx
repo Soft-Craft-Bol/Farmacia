@@ -4,7 +4,7 @@ import './Sidebar.css';
 import { IoIosArrowBack, PiChalkboardTeacher, GrAnalytics, FaUser, MdNavigateNext, FaHome,
    FaUserGraduate, TbLogout, AiOutlineGroup, FaCalendarAlt } from '../../hooks/icons';
 import { useTheme } from '../../hooks/useTheme';
-import { signOut } from '../../pages/login/authFuntions';
+import { signOut, getUser } from '../../pages/login/authFuntions';
 
 
 const staticUser = {
