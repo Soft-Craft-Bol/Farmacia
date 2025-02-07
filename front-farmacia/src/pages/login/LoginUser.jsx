@@ -31,14 +31,14 @@ function LoginUser() {
     try {
       const result = await loginUser(values);
 console.log(result);
-      if (result && result.data && result.data.access_token) {
-        saveToken(result.data.access_token);
+      if (result && result.data && result.data.token) {
+        saveToken(result.data.token);
 
         const user = {
           username: result.data.username || '',
-          roles: result.data.roles || [],
-          photo: result.data.photo || '',
-          full_name: result.data.full_name || '',
+          //roles: result.data.roles || [],
+          photo: result.data.foto || '',
+          full_name: result.data.nombreCompleto || '',
         };
 
         saveUser(user);
