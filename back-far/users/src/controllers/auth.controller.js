@@ -11,6 +11,16 @@ exports.register = async (req, res) => {
         // Hashear contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const roles = await prisma.role.findMany({
+            where: {
+                id: { in: roleIds },
+            }
+        });
+        
+        if (roles.length !== roleIds.length) {
+            return res.status(400).json({ error: 'Uno o más roles no existen' });
+        }
+
         // Crear usuario
         const user = await prisma.user.create({
             data: {
