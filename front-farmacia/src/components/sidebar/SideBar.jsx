@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import './Sidebar.css';
 import { IoIosArrowBack, PiChalkboardTeacher, GrAnalytics, FaUser, MdNavigateNext, FaHome,
-   FaUserGraduate, TbLogout, AiOutlineGroup, FaCalendarAlt } from '../../hooks/icons';
+   FaUserGraduate, TbLogout, AiOutlineGroup, FaCalendarAlt,RiTeamFill } from '../../hooks/icons';
 import { useTheme } from '../../hooks/useTheme';
 import { signOut, getUser } from '../../pages/login/authFuntions';
 
@@ -84,7 +84,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <SidebarLink to="/list-indicador" icon={<AiOutlineGroup />} text="Indicadores" />
             <SidebarLink to="/calendar" icon={<FaCalendarAlt />} text="Calendario" />
             <SidebarLink to="/graphics" icon={<GrAnalytics />} text="Graficos" />
-            <SidebarLink to="/me-gustas" icon={<FaUserGraduate />} text="Likes" />
+            <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />
           </ul>
         </div>
         <div className="bottom-content">

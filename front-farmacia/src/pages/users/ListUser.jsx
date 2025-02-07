@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
-import { Button } from "../../components/buttons/Button";
+import ItemUser from '../../components/itemUser/itemUser';
+/*import { Button } from "../../components/buttons/Button";
 import Table from "../../components/table/Table";
 import SearchBar from "../../components/searchBar/SearchBar";
 import { FaEdit, MdDelete } from "../../hooks/icons";
@@ -172,7 +173,26 @@ const UserManagement = () => {
       </Suspense>
     </div>
   );
-};
+};*/
 
+
+const UserManagement = () => {
+  return(
+    <div className="usuarios-contenedor">
+      <h1>Usuarios</h1>
+      <div className="usuarios-header">
+        {/*PENDIENTE, PARA BUSCADOR Y BOTON*/ }
+      </div>
+      <ItemUser
+        nombre='Patricio estrella'
+        ci='78415520'
+        correo='exapmle@gmail.com'
+        cargo='Jefecito'
+        cantTeams='15'
+        foto='https://i.pinimg.com/originals/26/e1/17/26e1178bf34a402026260db456882565.jpg'
+        />
+    </div>
+  )
+}
 export default UserManagement;
 
