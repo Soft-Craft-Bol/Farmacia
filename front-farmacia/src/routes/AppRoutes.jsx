@@ -11,7 +11,7 @@ const UserManagement = lazy(() => import("../pages/users/ListUser"));
 const AppRoutes = () => (
   <Routes>
     {/* Rutas públicas */}
-    <Route path="/" element={<Sidebar />} />
+    <Route path="/" element={<LoginUser />} />
     
     {/* Rutas privadas */}
     <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
