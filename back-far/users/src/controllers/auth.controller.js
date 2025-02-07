@@ -53,12 +53,38 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-        return res.status(400).json({ error: 'Credenciales incorrectas' });
-    }
     
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    try {
+        // Buscar el usuario en la base de datos
+        const user = await prisma.user.findUnique({
+            where: { email },
+            include: {
+                roles: { include: { role: true } },  // Incluir roles
+            }
+        });
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(400).json({ error: 'Credenciales incorrectas' });
+        }
+
+        // Generar el token JWT
+        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // Obtener el nombre completo (nombre + apellido) y el rol del usuario
+        const fullName = `${user.nombre} ${user.apellido}`;
+        const roles = user.roles.map(userRole => userRole.role.nombre);
+        const photo = user.foto;
+
+        // Responder con los datos del usuario
+        res.json({
+            token,
+            usuario: user.usuario,
+            nombreCompleto: fullName,
+            roles: roles,  // Roles asociados al usuario
+            foto: photo    // Foto del usuario
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ error: 'Error al procesar la solicitud' });
+    }
 };
