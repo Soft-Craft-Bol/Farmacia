@@ -95,14 +95,14 @@ const EquipoForm = () => {
 
   return (
     <div className="equipo-form-container">
+      <h2>{id ? 'Editar Equipo' : 'Registrar Equipo'}</h2>
+
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
         <Form className="equipo-form">
-          <h2>{id ? 'Editar Equipo' : 'Registrar Equipo'}</h2>
-
           <InputText label="Etiqueta del Activo" name="etiquetaActivo" required />
           <InputText label="Número de Serie" name="numeroSerie" required />
           <InputText label="Modelo" name="modelo" required />
@@ -118,12 +118,7 @@ const EquipoForm = () => {
             <option value="Preventivo">Preventivo</option>
             <option value="Correctivo">Correctivo</option>
           </Select>
-          <InputText
-            label="Fecha de Compra"
-            name="fechaCompra"
-            type="date"
-            required
-          />
+          <InputText label="Fecha de Compra" name="fechaCompra" type="date" required />
           <InputText label="Proveedor" name="proveedor" required />
           <InputText label="Número de Orden" name="numeroOrden" required />
 

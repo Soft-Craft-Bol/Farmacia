@@ -82,7 +82,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             {/* {isAdmin && (
               
             )} */}
-            <SidebarLink to="/listTeacher" icon={<PiChalkboardTeacher />} text="Profesores" />
+            <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
             <SidebarLink to="/allUsers" icon={<PiUsersFourDuotone />} text="Todos los usuarios" />
             <SidebarLink to="/calendar" icon={<FaCalendarAlt />} text="Calendario" />
             <SidebarLink to="/equipos" icon={<GrAnalytics />} text="Equipos" />

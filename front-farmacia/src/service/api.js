@@ -33,6 +33,7 @@ export const loginUser = (data) => apiUsers.post('/auth/login', data);
 export const getUsers = () => apiUsers.get('/users');
 export const deleteUser = (id) => apiUsers.delete(`/users/${id}`);
 export const getRoles = () => apiUsers.get('/auth/roles');
+
 export const addUser = (data) => apiUsers.post('/auth/register', data);
 export const updateUser = (id, data) => apiUsers.put(`/users/${id}`, data);
 export const getUserById = (id) => apiUsers.get(`/users/${id}`);
