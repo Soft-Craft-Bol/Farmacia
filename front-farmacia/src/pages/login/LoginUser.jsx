@@ -43,17 +43,10 @@ function LoginUser() {
 
         // Guardar datos del usuario
         const user = {
-<<<<<<< HEAD
           username: result.data.usuario || "",
           roles: result.data.roles || [],
           photo: result.data.foto || "",
           full_name: result.data.nombreCompleto || "",
-=======
-          username: result.data.username || '',
-          roles: result.data.roles || [],
-          photo: result.data.foto || '',
-          full_name: result.data.nombreCompleto || '',
->>>>>>> c7ba027134ab5f95585a9ad480c3a4d963faee8b
         };
 
         saveUser(user);
