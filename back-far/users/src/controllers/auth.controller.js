@@ -89,3 +89,9 @@ exports.login = async (req, res) => {
         res.status(400).json({ error: 'Error al procesar la solicitud' });
     }
 };
+
+
+exports.getRoles = async (req, res) => {
+    const roles = await prisma.role.findMany();
+    res.json(roles);
+};

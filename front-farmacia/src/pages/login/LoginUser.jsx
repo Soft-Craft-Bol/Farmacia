@@ -36,7 +36,7 @@ console.log(result);
 
         const user = {
           username: result.data.username || '',
-          //roles: result.data.roles || [],
+          roles: result.data.roles || [],
           photo: result.data.foto || '',
           full_name: result.data.nombreCompleto || '',
         };

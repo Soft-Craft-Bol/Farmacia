@@ -1,17 +1,14 @@
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
-import ItemUser from '../../components/itemUser/itemUser';
-/*import { Button } from "../../components/buttons/Button";
 import Table from "../../components/table/Table";
-import SearchBar from "../../components/searchBar/SearchBar";
 import { FaEdit, MdDelete } from "../../hooks/icons";
-import { getUsers, deleteUser, getRoles } from "../../api/api";
-import { getUser } from "../login/authFunctions";
+import { getUsers, deleteUser, getRoles } from "../../service/api";
+import { getUser } from "../login/authFuntions";
 import { Toaster, toast } from "sonner";
 import { Link } from "react-router-dom";
 import LinkButton from "../../components/buttons/LinkButton";
 import "./ListUser.css";
+import { ButtonPrimary } from "../../components/buttons/ButtonPrimary";
 
-// Carga perezosa del componente Modal para mejorar el rendimiento
 const Modal = lazy(() => import("../../components/modal/Modal"));
 
 const UserManagement = () => {
@@ -39,6 +36,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await getUsers();
+      console.log(response);
       setUsers(response.data);
     };
     fetchUsers();
@@ -75,29 +73,11 @@ const UserManagement = () => {
   );
 
 
-  // Filtering users based on text and filter values
-  const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      return (
-        (!filterText ||
-          user.name?.toLowerCase().includes(filterText.toLowerCase()) ||
-          user.last_name?.toLowerCase().includes(filterText.toLowerCase()) ||
-          user.username?.toLowerCase().includes(filterText.toLowerCase()) ||
-          user.email?.toLowerCase().includes(filterText.toLowerCase()) ||
-          user.role?.toLowerCase().includes(filterText.toLowerCase())) &&
-        Object.keys(filterValues).every((key) =>
-          filterValues[key]
-            ? user[key]?.toString().toLowerCase() === filterValues[key].toString().toLowerCase()
-            : true
-        )
-      );
-    });
-  }, [users, filterText, filterValues]);
 
-  const isAdmin = useMemo(
+  /* const isAdmin = useMemo(
     () => currentUser?.roles.includes("Administrador"),
     [currentUser]
-  );
+  ); */
 
   // Memoizing column definitions to avoid unnecessary re-renders
   const columns = useMemo(
@@ -116,30 +96,30 @@ const UserManagement = () => {
           </div>
         ),
       },
-      { header: "Nombre", accessor: "name" },
-      { header: "Apellido", accessor: "last_name" },
-      { header: "Teléfono", accessor: "phone" },
+      { header: "Nombre", accessor: "nombre" },
+      { header: "Apellido", accessor: "apellido" },
+      { header: "Profesion", accessor: "profesion" },
       { header: "Correo Electrónico", accessor: "email" },
-      { header: "Tipo de Usuario", accessor: "roles" },
-      isAdmin && {
+      { header: "Tipo de Usuario", accessor: "usuario" },
+      {
         header: "Acciones",
         render: (row) => (
           <div className="user-management-table-actions">
             <Link to={`/editUser/${row.id}`} className="user-management-edit-user">
               <FaEdit />
             </Link>
-            <Button
+            <ButtonPrimary
               type="danger"
               onClick={() => confirmDeleteUser(row)}
               disabled={currentUser?.id === row.id}
             >
               <MdDelete />
-            </Button>
+            </ButtonPrimary>
           </div>
         ),
       },
     ].filter(Boolean),
-    [isAdmin, confirmDeleteUser, currentUser]
+    [ confirmDeleteUser, currentUser]
   );
 
   return (
@@ -147,11 +127,10 @@ const UserManagement = () => {
       <Toaster dir="auto" closeButton richColors visibleToasts={2} duration={2000} position="bottom-right" />
       <div className="user-management-header">
         <h2 className="user-management-title">Gestión de Usuarios</h2>
-        <SearchBar value={filterText} onChange={(e) => setFilterText(e.target.value)} />
-        {isAdmin && <LinkButton to={`/registerUser`}>Agregar Usuario</LinkButton>}
+         <LinkButton to={`/registerUser`}>Agregar Usuario</LinkButton>
       </div>
 
-      <Table columns={columns} data={filteredUsers} className="user-management-table" />
+      <Table columns={columns} data={users} className="user-management-table" />
 
       <Suspense fallback={<div>Cargando modal...</div>}>
         {deleteConfirmOpen && (
@@ -161,38 +140,19 @@ const UserManagement = () => {
         <h2>Confirmar Eliminación</h2>
         <p>¿Estás seguro de que deseas eliminar este usuario?</p>
         <div className="user-management-table-actions">
-          <Button type="danger" onClick={handleDeleteUser}>
+          <ButtonPrimary type="danger" onClick={handleDeleteUser}>
             Confirmar
-          </Button>
-          <Button type="secondary" onClick={() => setDeleteConfirmOpen(false)}>
+          </ButtonPrimary>
+          <ButtonPrimary type="secondary" onClick={() => setDeleteConfirmOpen(false)}>
             Cancelar
-          </Button>
+          </ButtonPrimary>
         </div>
       </Modal>
         )}
       </Suspense>
     </div>
   );
-};*/
+};
 
-
-const UserManagement = () => {
-  return(
-    <div className="usuarios-contenedor">
-      <h1>Usuarios</h1>
-      <div className="usuarios-header">
-        {/*PENDIENTE, PARA BUSCADOR Y BOTON*/ }
-      </div>
-      <ItemUser
-        nombre='Patricio estrella'
-        ci='78415520'
-        correo='exapmle@gmail.com'
-        cargo='Jefecito'
-        cantTeams='15'
-        foto='https://i.pinimg.com/originals/26/e1/17/26e1178bf34a402026260db456882565.jpg'
-        />
-    </div>
-  )
-}
 export default UserManagement;
 

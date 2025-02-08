@@ -2,14 +2,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../../components/inputs/InputText';
-import Select from '../../components/selected/Select';
-import { Button } from '../../components/buttons/Button';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getRoles, addUser, updateUser, getUserById } from '../../api/api';
+import { getRoles, addUser, updateUser, getUserById } from '../../service/api';
 import { FaCamera } from '../../hooks/icons';
 import { Toaster, toast } from 'sonner';
 import { useTheme } from '../../context/ThemeContext';
 import './RegisterUser.css';
+import Select from '../../components/select/Select';
+import { ButtonPrimary } from '../../components/buttons/ButtonPrimary';
 
 function UserForm() {
   const navigate = useNavigate();
@@ -65,9 +65,10 @@ function UserForm() {
     const fetchRoles = async () => {
       try {
         const response = await getRoles();
+        console.log(response);
         setRoles(response.data.map((rol) => ({
           value: rol.id,
-          label: rol.name,
+          label: rol.nombre,
         })));
       } catch (error) {
         notify('Error al obtener los roles.', 'error');
@@ -203,13 +204,13 @@ function UserForm() {
                 </div>
               </div>
             </div>
-            <Button
+            <ButtonPrimary
               variant="primary"
               type="submit"
               style={{ marginTop: '20px', alignSelf: 'center' }}
             >
               {editingUser ? 'Actualizar' : 'Registrar'}
-            </Button>
+            </ButtonPrimary>
           </Form>
         )}
       </Formik>
