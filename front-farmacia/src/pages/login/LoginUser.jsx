@@ -1,54 +1,68 @@
-import React, { useState, useCallback, lazy, Suspense } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
-import './LoginUser.css';
-import { loginUser } from '../../service/api';
-import { saveToken, saveUser } from './authFuntions';
-import ImagenesApp from '../../assets/ImagenesApp';
-import { ButtonPrimary } from '../../components/buttons/ButtonPrimary';
+import React, { useState, useCallback, lazy, Suspense } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import "./LoginUser.css";
+import { loginUser } from "../../service/api";
+import { saveToken, saveUser } from "./authFuntions"; // Asegúrate de que funcionan bien
+import ImagenesApp from "../../assets/ImagenesApp";
+import { ButtonPrimary } from "../../components/buttons/ButtonPrimary";
 
-const InputText = lazy(() => import('../../components/inputs/InputText'));
+const InputText = lazy(() => import("../../components/inputs/InputText"));
 
 const initialValues = {
-  email: '',
-  password: '',
+  email: "",
+  password: "",
 };
 
 const validationSchema = Yup.object({
   email: Yup.string()
-    .email('Correo electrónico inválido')
-    .required('El correo electrónico es requerido'),
-  password: Yup.string().required('La contraseña es requerida'),
+    .email("Correo electrónico inválido")
+    .required("El correo electrónico es requerido"),
+  password: Yup.string().required("La contraseña es requerida"),
 });
 
 function LoginUser() {
-  const [loginError, setLoginError] = useState('');
+  const [loginError, setLoginError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = useCallback(async (values, { setSubmitting }) => {
-    setLoginError(''); // Limpiar errores previos
+    setLoginError(""); // Limpiar errores previos
     try {
-      const result = await loginUser(values);
-console.log(result);
-      if (result && result.data && result.data.token) {
-        saveToken(result.data.token);
+      console.log("Enviando credenciales:", values); // Depuración
 
+      const result = await loginUser(values);
+      console.log("Respuesta del servidor:", result); // Depuración
+
+      if (result && result.data && result.data.token) {
+        console.log("Token recibido:", result.data.token); // Depuración
+
+        // Guardar el token en localStorage
+        saveToken(result.data.token);
+        localStorage.setItem("token", result.data.token); // Asegurar que se guarda
+
+        // Guardar datos del usuario
         const user = {
-          username: result.data.username || '',
-          //roles: result.data.roles || [],
-          photo: result.data.foto || '',
-          full_name: result.data.nombreCompleto || '',
+          username: result.data.usuario || "",
+          roles: result.data.roles || [],
+          photo: result.data.foto || "",
+          full_name: result.data.nombreCompleto || "",
         };
 
         saveUser(user);
-        navigate('/home');
+        localStorage.setItem("user", JSON.stringify(user)); // Guardar usuario en localStorage
+
+        console.log("Token guardado en localStorage:", localStorage.getItem("token"));
+        console.log("Usuario guardado en localStorage:", localStorage.getItem("user"));
+
+        navigate("/home");
       } else {
-        setLoginError('Credenciales incorrectas. Por favor, intente de nuevo.');
+        console.error("Error: No se recibió un token válido.");
+        setLoginError("Credenciales incorrectas. Por favor, intente de nuevo.");
       }
     } catch (error) {
-      console.error('Error en login:', error);
-      setLoginError('Error en el servidor. Intente más tarde.');
+      console.error("Error en login:", error);
+      setLoginError("Error en el servidor. Intente más tarde.");
     } finally {
       setSubmitting(false);
     }
@@ -60,11 +74,7 @@ console.log(result);
         <h2>Inicia sesión</h2>
         <img className="logo-fesa" src={ImagenesApp.logo} alt="Logo" height="80px" />
 
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
           {({ isSubmitting }) => (
             <Form>
               <Suspense fallback={<div>Cargando campo...</div>}>
@@ -76,7 +86,7 @@ console.log(result);
 
               <Link to="/reset">¿Olvidaste la contraseña?</Link>
               <ButtonPrimary type="submit" variant="primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Ingresando...' : 'Ingresar'}
+                {isSubmitting ? "Ingresando..." : "Ingresar"}
               </ButtonPrimary>
             </Form>
           )}

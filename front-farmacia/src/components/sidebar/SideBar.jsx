@@ -5,10 +5,11 @@ import { IoIosArrowBack, PiChalkboardTeacher, GrAnalytics, FaUser, MdNavigateNex
    FaUserGraduate, TbLogout, AiOutlineGroup, FaCalendarAlt,RiTeamFill } from '../../hooks/icons';
 import { useTheme } from '../../hooks/useTheme';
 import { signOut, getUser } from '../../pages/login/authFuntions';
+import { FaUserCircle } from 'react-icons/fa';
 
 
 const staticUser = {
-  photo: 'https://example.com/photo.jpg',  // URL de la foto del perfil
+  photo: 'https://lh3.googleusercontent.com/a-/ALV-UjUkAvY2Fg5liERiMbSpCN6Rk2M9aMyOt40dZqOk4CT0clkefEsfCw',  // URL de la foto del perfil
   username: 'Juan Pérez',
   roles: ['Usuario'],
 };
@@ -75,6 +76,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <SidebarHeader onToggle={toggleSidebar} isOpen={isOpen} />
         <div className="menu">
           <ul className="menu-links">
+            <SidebarLink to="/profile" icon={<FaUserCircle />} text="Perfil" />
             <SidebarLink to="/home" icon={<FaHome />} text="Dashboard" />
             <SidebarLink to="/userManagement" icon={<FaUser />} text="Usuarios" />
             {/* {isAdmin && (

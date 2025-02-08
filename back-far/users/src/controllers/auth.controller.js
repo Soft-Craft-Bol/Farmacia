@@ -50,6 +50,41 @@ exports.register = async (req, res) => {
         res.status(400).json({ error: 'Error al registrar usuario' });
     }
 };
+exports.getProfile = async (req, res) => {
+    try {
+  
+      const userId = req.user.id;
+  
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          roles: { include: { role: true } },
+        },
+      });
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      const response = {
+        id: user.id,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        usuario: user.usuario,
+        email: user.email,
+        ci: user.ci,
+        profesion: user.profesion,
+        foto: user.foto,
+        area: user.areaId, 
+        roles: user.roles.map(r => r.role.nombre),
+      };
+  
+      return res.json(response);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error fetching profile' });
+    }
+  };
 
 exports.login = async (req, res) => {
     console.log(req.body);
