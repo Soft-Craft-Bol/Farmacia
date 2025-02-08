@@ -31,7 +31,7 @@ function UserForm() {
     profesion: '',
     foto: null,
     areaId: 1, // Asumiendo que el área por defecto es 1
-    roleIds: [],
+    role: '', // Cambiado para aceptar un solo rol
   });
 
   const notify = useCallback((message, type = 'success') => {
@@ -57,7 +57,7 @@ function UserForm() {
       }),
     ci: Yup.string().required('Requerido'),
     profesion: Yup.string().required('Requerido'),
-    roleIds: Yup.array().min(1, 'Seleccione al menos un rol').required('Requerido'),
+    role: Yup.string().required('Requerido'), // Cambiado para ser un solo rol
     foto: Yup.mixed().nullable(),
   }), []);
 
@@ -89,7 +89,7 @@ function UserForm() {
           profesion: response.data.profesion || '',
           foto: response.data.foto || null,
           areaId: response.data.areaId || 1,
-          roleIds: response.data.roleIds || [],
+          role: response.data.roleIds[0] || '', // Asumiendo que es un solo rol
         });
 
         if (response.data.foto) setPhotoPreview(response.data.foto);
@@ -104,16 +104,17 @@ function UserForm() {
 
   const handleSubmit = useCallback(async (values, { resetForm }) => {
     const formData = new FormData();
+    
     Object.keys(values).forEach((key) => {
       if (values[key] !== null) formData.append(key, values[key]);
     });
-
+  
     try {
       if (editingUser) {
-        await updateUser(editingUser.id, formData);
+        await updateUser(editingUser.id, formData);  
         notify('Usuario actualizado exitosamente.');
       } else {
-        await addUser(formData);
+        await addUser(formData);  
         notify('Usuario agregado exitosamente.');
       }
       resetForm();
@@ -192,7 +193,7 @@ function UserForm() {
                   />
                   <InputText label="Correo Electrónico" name="email" required />
                   <InputText label="Profesión" name="profesion" required />
-                  <Select label="Roles" name="roleIds" multiple required>
+                  <Select label="Roles" name="role" required>  {/* Aquí cambiamos a un solo rol */}
                     <option value="">Seleccione un rol</option>
                     {roles.map((rol) => (
                       <option key={rol.value} value={rol.value}>

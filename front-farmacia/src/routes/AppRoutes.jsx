@@ -11,6 +11,9 @@ const UserForm = lazy(() => import("../pages/users/RegisterUser"));
 const UserManagement = lazy(() => import("../pages/users/ListUser"));
 const FormTeams = lazy(() => import("../pages/formTeam/formTeam"));
 const AllUsers = lazy(() => import("../pages/allUsers/AllUsers"));
+const EquipoList = lazy(() => import("../pages/equipos/EquiposList"));
+const EquipoForm = lazy(() => import("../pages/equipos/EquipoForm"));
+
 const AppRoutes = () => (
   <Routes>
     {/* Rutas públicas */}
@@ -24,6 +27,10 @@ const AppRoutes = () => (
     <Route path="/teams/register" element={<PrivateRoute><FormTeams /></PrivateRoute>} />
     <Route path="/allUsers" element={<PrivateRoute><AllUsers /></PrivateRoute>} />
     <Route path="/editUser/:id" element={<PrivateRoute><UserForm /></PrivateRoute>} />
+    <Route path="/equipos/register" element={<PrivateRoute><EquipoForm /></PrivateRoute>} />
+    <Route path="/equipos" element={<PrivateRoute><EquipoList /></PrivateRoute>} />
+
+
   </Routes>
 );
 
