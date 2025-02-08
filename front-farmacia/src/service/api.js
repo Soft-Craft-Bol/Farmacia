@@ -26,6 +26,7 @@ export const loginUser = (data) => api.post('/auth/login', data);
 export const getUsers = () => api.get('/users');
 export const deleteUser = (id) => api.delete(`/users/${id}`);
 export const getRoles = () => api.get('/auth/roles');
+export const getUserProfile = () => api.get('/auth/profile');
 
 
 export const addUser = (data) => api.post('/auth/register', data);
