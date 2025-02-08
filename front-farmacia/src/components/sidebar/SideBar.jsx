@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import './Sidebar.css';
-import { IoIosArrowBack, PiChalkboardTeacher, GrAnalytics, FaUser, MdNavigateNext, FaHome,
-   FaUserGraduate, TbLogout, AiOutlineGroup, FaCalendarAlt,RiTeamFill } from '../../hooks/icons';
+import { IoIosArrowBack, PiChalkboardTeacher, GrAnalytics, MdNavigateNext, FaHome,
+    TbLogout, AiOutlineGroup, FaCalendarAlt,RiTeamFill, FaUsersGear,PiUsersFourDuotone } from '../../hooks/icons';
 import { useTheme } from '../../hooks/useTheme';
 import { signOut, getUser } from '../../pages/login/authFuntions';
 import { FaUserCircle } from 'react-icons/fa';
@@ -78,12 +78,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <ul className="menu-links">
             <SidebarLink to="/profile" icon={<FaUserCircle />} text="Perfil" />
             <SidebarLink to="/home" icon={<FaHome />} text="Dashboard" />
-            <SidebarLink to="/userManagement" icon={<FaUser />} text="Usuarios" />
+            <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
             {/* {isAdmin && (
               
             )} */}
             <SidebarLink to="/listTeacher" icon={<PiChalkboardTeacher />} text="Profesores" />
-            <SidebarLink to="/list-indicador" icon={<AiOutlineGroup />} text="Indicadores" />
+            <SidebarLink to="/allUsers" icon={<PiUsersFourDuotone />} text="Todos los usuarios" />
             <SidebarLink to="/calendar" icon={<FaCalendarAlt />} text="Calendario" />
             <SidebarLink to="/graphics" icon={<GrAnalytics />} text="Graficos" />
             <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />

@@ -23,6 +23,9 @@ import { GiTeacher } from "react-icons/gi";
 import { FaCamera } from "react-icons/fa";
 import { FaCalendarAlt } from "react-icons/fa";
 import { RiTeamFill } from "react-icons/ri";
+import { FaUsersGear } from "react-icons/fa6";
+import { PiUsersFourDuotone } from "react-icons/pi";
+
 
 export {
   MdAdminPanelSettings,
@@ -49,5 +52,7 @@ export {
   MdNavigateNext,
   GrAnalytics,
   PiChalkboardTeacher,
-  RiTeamFill
+  RiTeamFill,
+  FaUsersGear,
+  PiUsersFourDuotone
 };
