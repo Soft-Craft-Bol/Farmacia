@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 import "./ProfileUser.css";
+import { FaUser } from "react-icons/fa";
+import { IoIosMail } from "react-icons/io";
+import { FaIdCard } from "react-icons/fa6";
+import { MdWorkspaces } from "react-icons/md";
+import { FaUserGroup } from "react-icons/fa6";
 
 export default function UserProfile() {
   const [user, setUser] = useState(null);
@@ -14,13 +19,11 @@ export default function UserProfile() {
       return;
     }
 
-    fetch("http://localhost:5000/auth/profile", { 
+    fetch("http://localhost:5000/auth/profile", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      
-
     })
       .then(async (response) => {
         if (!response.ok) {
@@ -34,7 +37,7 @@ export default function UserProfile() {
           throw new Error(errMessage);
         }
         return response.json();
-        })
+      })
       .then((data) => {
         setUser(data);
       })
@@ -54,52 +57,49 @@ export default function UserProfile() {
   return (
     <div className="container">
       <div className="content">
-        <h1>Perfil del Usuario</h1>
-        <div className="perfil-container">
-          <div className="profile-image">
-            
-            <img 
-              src={user.foto || "https://via.placeholder.com/150"}
-              alt="Perfil"
-              className="img-perfil"
-            />
+        
+        <div className="profile-row">
+          <div className="perfil-container">
+            <div className="profile-image">
+              <img
+                src={user.foto}
+                alt="Perfil"
+                className="img-perfil"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="info-container">
-          <div className="info-group">
-            <span className="label">Usuario:</span>
-            <span className="value">{user.usuario}</span>
+          <div className="info-container">
+            <h1 className="profile-name">
+              {user.nombre} {user.apellido}
+            </h1>
+            <p className="profile-title">
+              {user.profesion}{" "}
+            </p>
+            <div className="meta-item">
+              <FaUser className="meta-icon" />
+              <span className="meta-text">Usuario: {user.usuario}</span>
+            </div>
+            <div className="meta-item">
+              <IoIosMail className="meta-icon" />
+              <span className="meta-text">{user.email}</span>
+            </div>
+            
           </div>
-          <div className="info-group">
-            <span className="label">Correo:</span>
-            <span className="value">{user.email}</span>
-          </div>
-          <div className="info-group">
-            <span className="label">Nombre:</span>
-            <span className="value">{user.nombre}</span>
-          </div>
-          <div className="info-group">
-            <span className="label">Apellido:</span>
-            <span className="value">{user.apellido}</span>
-          </div>
-          <div className="info-group">
-            <span className="label">CI:</span>
-            <span className="value">{user.ci}</span>
-          </div>
-          <div className="info-group">
-            <span className="label">Profesión:</span>
-            <span className="value">{user.profesion}</span>
-          </div>
-          <div className="info-group">
-            <span className="label">Área:</span>
-            <span className="value">{user.area}</span>
-          </div>
-          <div className="info-group">
-            <span className="label">Roles:</span>
-            <span className="value">{user.roles ? user.roles.join(", ") : "Sin roles"}</span>
-          </div>
+          
         </div>
+            <div className="info-group">
+              <MdWorkspaces className="meta-icon" />
+              <span className="meta-text">Área: {user.area}</span>
+            </div>
+            <div className="info-group">
+              <FaIdCard className="meta-icon" />
+              <span className="meta-text">CI: {user.ci}</span>
+            </div>
+            <div className="info-group">
+              <FaUserGroup className="meta-icon" />
+              <span className="meta-text">{user.roles ? user.roles.join(", ") : "Sin roles"}</span>
+            </div>
       </div>
     </div>
   );

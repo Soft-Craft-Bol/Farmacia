@@ -1,13 +1,14 @@
+/* Reseteo básico y fuente */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-}
-.content h1 {
-  margin-bottom: 30px; 
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+               'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+/* Contenedor principal */
 .container {
   display: flex;
   flex-direction: column;
@@ -17,6 +18,7 @@
   gap: 20px;
 }
 
+/* Card principal */
 .content {
   width: 100%;
   max-width: 900px;
@@ -25,46 +27,91 @@
   border-radius: 10px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-  text-align: center;
+  /* Para que el h1 y la fila estén organizados verticalmente */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
+/* Título */
+.content h1 {
+  margin-bottom: 0; /* Ajustar si deseas un espacio mayor o menor */
+}
+
+/* Modo oscuro */
 body.dark .content {
   background: #273142 !important;
   color: white;
   box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
 }
 
-.profile-image {
+/* Fila donde la imagen estará a la izquierda y el texto a la derecha */
+.profile-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start; /* Alineación vertical */
+  justify-content: space-between;
+  gap: 30px;
+}
+
+/* Columna izquierda: Contiene la imagen */
+.perfil-container {
+  flex: 1; /* Toma 1 parte del espacio */
   display: flex;
   justify-content: center;
-  width: 100%;
-  margin-bottom: 40px;
+  align-items: center;
+}
+
+.profile-image {
+  max-width: 250px; /* Controla el ancho máximo de la imagen */
+  text-align: center;
 }
 
 .img-perfil {
-  width: 230px;
-  height: 230px;
+  width: 100%;
+  max-width: 230px;
+  height: auto;
   border-radius: 50%;
   border: 3px solid #ccc;
   object-fit: cover;
 }
 
+/* Columna derecha: Contiene la información */
 .info-container {
+  flex: 2; /* Toma 2 partes del espacio para ser más ancha que la imagen */
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  max-width: 600px;
-  margin: auto;
+  gap: 15px;
   text-align: left;
+  justify-content: center;
 }
 
 .info-group {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+  gap: 10px;
+  /* font-size: 1.2rem; */
+  padding: 10px 20px;
+  /* border-radius: 8px; */
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+}
+
+.profile-name {
+  letter-spacing: 3px;  
+}
+.meta-icon {
+  font-size: 1.5rem;  
+  margin-right: 12px;  
+  vertical-align: middle;
+}
+.additional-info {
+  display: flex;
+  justify-content: center; 
+  gap: 30px; 
+  flex-wrap: wrap;  
+  padding-top: 20px;
+  border-top: 2px solid #ddd;  
+  margin-top: 20px;  
 }
 
 .label {
@@ -76,29 +123,35 @@ body.dark .content {
   color: #555;
 }
 
+/* Modo oscuro para la info */
 body.dark .info-group {
   border-bottom: 1px solid #4c5a67;
 }
-
 body.dark .label {
   color: white;
 }
-
 body.dark .value {
   color: #ccc;
 }
 
+/* Responsividad: en pantallas pequeñas, se apila la imagen y el texto */
 @media (max-width: 768px) {
+  .profile-row {
+    flex-direction: column; /* Imagen arriba, texto abajo */
+    align-items: center;
+  }
+
+  .perfil-container,
+  .info-container {
+    flex: unset; /* Quita el valor de flex para no forzar anchos */
+    width: 100%;
+  }
+
+  .info-container {
+    text-align: center;
+  }
+
   .info-group {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .label {
-    font-size: 16px;
-  }
-
-  .value {
-    font-size: 14px;
+    align-items: center;
   }
 }
