@@ -1,3 +1,5 @@
+const prisma = require("../config/prisma");
+
 exports.getUsers = async (req, res) => {
     const users = await prisma.user.findMany();
     res.json(users);
@@ -38,3 +40,4 @@ exports.getUsersByRole = async (req, res) => {
     });
     res.json(users);
 };
+

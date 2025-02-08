@@ -1,22 +1,43 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
+const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../config/cloudinaryConf');
+
 require('dotenv').config();
 
 
-exports.register = async (req, res) => {
-    const { nombre, apellido, usuario, email, password, ci, profesion, foto, areaId, roleIds } = req.body;
-    
+// Configurar el almacenamiento de multer para Cloudinary
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: 'usuariosFarmacia', 
+      allowed_formats: ["jpg", "png", "avif", "webp"], 
+      public_id: (req, file) => `${Date.now()}-${file.originalname}`, 
+    },
+  });
+  
+  const upload = multer({ storage });
+
+
+  exports.register = async (req, res) => {
+    console.log(req.body);
     try {
+        const { nombre, apellido, usuario, email, password, ci, profesion, areaId, roleIds } = req.body;
+        
+        // Verifica si se subió una foto
+        const foto = req.file ? req.file.path : null;
+
         // Hashear contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const roles = await prisma.role.findMany({
             where: {
-                id: { in: roleIds },
+                id: { in: roleIds.map(id => Number(id)) },
             }
         });
-        
+
         if (roles.length !== roleIds.length) {
             return res.status(400).json({ error: 'Uno o más roles no existen' });
         }
@@ -31,11 +52,11 @@ exports.register = async (req, res) => {
                 password: hashedPassword,
                 ci,
                 profesion,
-                foto,
-                areaId,
+                foto,  // Guardar URL de Cloudinary
+                areaId: Number(areaId),
                 roles: {
                     create: roleIds.map(roleId => ({
-                        role: { connect: { id: roleId } }
+                        role: { connect: { id: Number(roleId) } }
                     }))
                 }
             },
@@ -123,4 +144,10 @@ exports.login = async (req, res) => {
         console.error(error);
         res.status(400).json({ error: 'Error al procesar la solicitud' });
     }
+};
+
+
+exports.getRoles = async (req, res) => {
+    const roles = await prisma.role.findMany();
+    res.json(roles);
 };
