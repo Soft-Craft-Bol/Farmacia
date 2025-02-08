@@ -1,29 +1,36 @@
 import { Link } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo,useState,useEffect } from 'react';
 import './Sidebar.css';
-import { IoIosArrowBack, PiChalkboardTeacher, GrAnalytics, FaUser, MdNavigateNext, FaHome,
-   FaUserGraduate, TbLogout, AiOutlineGroup, FaCalendarAlt,RiTeamFill } from '../../hooks/icons';
+import { IoIosArrowBack, PiChalkboardTeacher, GrAnalytics, MdNavigateNext, FaHome,
+    TbLogout, AiOutlineGroup, FaCalendarAlt,RiTeamFill, FaUsersGear,PiUsersFourDuotone } from '../../hooks/icons';
 import { useTheme } from '../../hooks/useTheme';
 import { signOut, getUser } from '../../pages/login/authFuntions';
 import { FaUserCircle } from 'react-icons/fa';
+import { getUserProfile } from '../../service/api';
 
-
-const staticUser = {
-  photo: 'https://lh3.googleusercontent.com/a-/ALV-UjUkAvY2Fg5liERiMbSpCN6Rk2M9aMyOt40dZqOk4CT0clkefEsfCw',  // URL de la foto del perfil
-  username: 'Juan Pérez',
-  roles: ['Usuario'],
-};
 
 const SidebarHeader = ({ onToggle, isOpen }) => {
-  const currentUser = staticUser;
-  const isAdmin = useMemo(() => currentUser?.roles.includes("Administrador"), [currentUser]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    getUserProfile()
+      .then((response) => setCurrentUser(response.data))
+      .catch((error) => console.error("Error al obtener el perfil:", error));
+  }, []);
+
+  const isAdmin = useMemo(() => currentUser?.roles?.includes("Administrador"), [currentUser]);
 
   return (
     <header className="sidebar-header">
       <div className="text logo">
-        <img className='logo-perfil' src={currentUser?.photo || ''} alt="Perfil" />
-        <span className="name">{currentUser?.roles.includes('Administrador') ? 'Administrador' : 'Usuario'}</span>
-        <span className="profe">{currentUser?.username || 'Usuario'}</span>
+        <img
+          className="logo-perfil"
+          src={currentUser?.foto || "https://via.placeholder.com/150"}
+          alt="Perfil"
+        />
+        <span className="name">
+           <i>Bienvenido {isAdmin ? "Administrador" : "Usuario"} </i></span> 
+        <span className="profe">{currentUser?.nombre || "Usuario"}</span>
       </div>
       {isOpen ? (
         <IoIosArrowBack className="toggle" onClick={onToggle} />
@@ -78,14 +85,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <ul className="menu-links">
             <SidebarLink to="/profile" icon={<FaUserCircle />} text="Perfil" />
             <SidebarLink to="/home" icon={<FaHome />} text="Dashboard" />
-            <SidebarLink to="/userManagement" icon={<FaUser />} text="Usuarios" />
+            <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
             {/* {isAdmin && (
               
             )} */}
-            <SidebarLink to="/listTeacher" icon={<PiChalkboardTeacher />} text="Profesores" />
-            <SidebarLink to="/list-indicador" icon={<AiOutlineGroup />} text="Indicadores" />
+            <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
+            <SidebarLink to="/allUsers" icon={<PiUsersFourDuotone />} text="Todos los usuarios" />
             <SidebarLink to="/calendar" icon={<FaCalendarAlt />} text="Calendario" />
-            <SidebarLink to="/graphics" icon={<GrAnalytics />} text="Graficos" />
+            <SidebarLink to="/equipos" icon={<GrAnalytics />} text="Equipos" />
             <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />
           </ul>
         </div>

@@ -1,0 +1,23 @@
+.allUsers-header{
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.search-input {
+    width: 80%;
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .search-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
