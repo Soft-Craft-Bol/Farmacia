@@ -1,0 +1,37 @@
+.itemUsuario-contenedor {
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 800px;
+    margin: 10px auto;
+}
+
+.item-datos {
+    flex: 1;
+    text-align: left;
+}
+
+.item-datos h1 {
+    font-size: 18px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.item-datos p {
+    font-size: 14px;
+    margin: 3px 0;
+    color: #555;
+}
+
+.itemUsuario-contenedor img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+}

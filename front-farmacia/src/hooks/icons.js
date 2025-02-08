@@ -22,7 +22,7 @@ import { FaClockRotateLeft } from "react-icons/fa6";
 import { GiTeacher } from "react-icons/gi";
 import { FaCamera } from "react-icons/fa";
 import { FaCalendarAlt } from "react-icons/fa";
-
+import { RiTeamFill } from "react-icons/ri";
 
 export {
   MdAdminPanelSettings,
@@ -48,5 +48,6 @@ export {
   GrMoney,
   MdNavigateNext,
   GrAnalytics,
-  PiChalkboardTeacher
+  PiChalkboardTeacher,
+  RiTeamFill
 };

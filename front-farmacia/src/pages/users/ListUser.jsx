@@ -9,7 +9,6 @@ import LinkButton from "../../components/buttons/LinkButton";
 import "./ListUser.css";
 import { ButtonPrimary } from "../../components/buttons/ButtonPrimary";
 
-// Carga perezosa del componente Modal para mejorar el rendimiento
 const Modal = lazy(() => import("../../components/modal/Modal"));
 
 const UserManagement = () => {
