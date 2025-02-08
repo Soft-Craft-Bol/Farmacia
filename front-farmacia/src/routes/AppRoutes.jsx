@@ -7,7 +7,7 @@ import  Sidebar  from "../components/sidebar/SideBar";
 const Home = lazy(() => import("../pages/home/Home"));
 const UserForm = lazy(() => import("../pages/users/RegisterUser"));
 const UserManagement = lazy(() => import("../pages/users/ListUser"));
-
+const FormTeams = lazy(() => import("../pages/formTeam/formTeam"))
 const AppRoutes = () => (
   <Routes>
     {/* Rutas públicas */}
@@ -17,8 +17,8 @@ const AppRoutes = () => (
     <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
     <Route path="/userManagement" element={<PrivateRoute><UserManagement /></PrivateRoute>} />
     <Route path="/registerUser" element={<PrivateRoute><UserForm /></PrivateRoute>} />
+    <Route path="/teams/register" element={<PrivateRoute><FormTeams /></PrivateRoute>} />
     <Route path="/editUser/:id" element={<PrivateRoute><UserForm /></PrivateRoute>} />
-    
   </Routes>
 );
 
