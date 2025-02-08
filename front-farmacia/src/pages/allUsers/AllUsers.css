@@ -1,8 +1,12 @@
-
+.allUsers-header{
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
 
 .search-input {
-    width: 100%;
-    max-width: 300px;
+    width: 80%;
     padding: 8px 12px;
     font-size: 16px;
     border: 1px solid #ccc;
