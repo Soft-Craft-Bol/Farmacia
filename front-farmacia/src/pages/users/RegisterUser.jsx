@@ -21,29 +21,28 @@ function UserForm() {
   const [photoPreview, setPhotoPreview] = useState(null);
 
   const [initialValues, setInitialValues] = useState({
-    name: '',
-    last_name: '',
-    username: '',
+    nombre: '',
+    apellido: '',
+    usuario: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
-    role: '',
-    photo: null,
+    ci: '',
+    profesion: '',
+    foto: null,
+    areaId: 1, // Asumiendo que el área por defecto es 1
+    roleIds: [],
   });
 
-  // Función de notificación para manejar errores y mensajes de éxito de forma centralizada
   const notify = useCallback((message, type = 'success') => {
     type === 'success' ? toast.success(message) : toast.error(message);
   }, []);
 
-  // Esquema de validación, optimizado con `useMemo` para evitar recrearlo en cada render
   const validationSchema = useMemo(() => Yup.object({
-    name: Yup.string().required('Requerido'),
-    last_name: Yup.string().required('Requerido'),
-    username: Yup.string().required('Requerido'),
+    nombre: Yup.string().required('Requerido'),
+    apellido: Yup.string().required('Requerido'),
+    usuario: Yup.string().required('Requerido'),
     email: Yup.string().email('Correo inválido').required('Requerido'),
-    phone: Yup.string().required('Requerido'),
     password: Yup.string()
       .min(6, 'Mínimo 6 caracteres')
       .when('editingUser', {
@@ -56,16 +55,16 @@ function UserForm() {
         is: false,
         then: Yup.string().required('Requerido'),
       }),
-    role: Yup.string().nullable().required('Requerido'),
-    photo: Yup.mixed().nullable(),
+    ci: Yup.string().required('Requerido'),
+    profesion: Yup.string().required('Requerido'),
+    roleIds: Yup.array().min(1, 'Seleccione al menos un rol').required('Requerido'),
+    foto: Yup.mixed().nullable(),
   }), []);
 
-  // Obtener roles y usuario en caso de edición
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const response = await getRoles();
-        console.log(response);
         setRoles(response.data.map((rol) => ({
           value: rol.id,
           label: rol.nombre,
@@ -80,18 +79,20 @@ function UserForm() {
         const response = await getUserById(id);
         setEditingUser(response.data);
         setInitialValues({
-          name: response.data.name || '',
-          last_name: response.data.last_name || '',
-          username: response.data.username || '',
+          nombre: response.data.nombre || '',
+          apellido: response.data.apellido || '',
+          usuario: response.data.usuario || '',
           email: response.data.email || '',
-          phone: response.data.phone || '',
           password: '',
           confirmPassword: '',
-          role: response.data.role || '',
-          photo: response.data.photo || null,
+          ci: response.data.ci || '',
+          profesion: response.data.profesion || '',
+          foto: response.data.foto || null,
+          areaId: response.data.areaId || 1,
+          roleIds: response.data.roleIds || [],
         });
 
-        if (response.data.photo) setPhotoPreview(response.data.photo);
+        if (response.data.foto) setPhotoPreview(response.data.foto);
       } catch (error) {
         notify('Error al obtener los datos del usuario.', 'error');
       }
@@ -101,9 +102,7 @@ function UserForm() {
     if (id) fetchUser();
   }, [id, notify]);
 
-  // Función de envío, optimizada con `useCallback`
   const handleSubmit = useCallback(async (values, { resetForm }) => {
-    console.log('Formulario enviado con los siguientes datos:', values); 
     const formData = new FormData();
     Object.keys(values).forEach((key) => {
       if (values[key] !== null) formData.append(key, values[key]);
@@ -124,10 +123,9 @@ function UserForm() {
     }
   }, [editingUser, navigate, notify]);
 
-  // Manejar el cambio de foto
   const handlePhotoChange = (event, setFieldValue) => {
     const file = event.currentTarget.files[0];
-    setFieldValue('photo', file);
+    setFieldValue('foto', file);
 
     if (file) {
       const reader = new FileReader();
@@ -161,12 +159,12 @@ function UserForm() {
                     <FaCamera className="camera-icon" />
                   )}
                 </div>
-                <label htmlFor="photo" className="photo-label">
+                <label htmlFor="foto" className="photo-label">
                   {photoPreview ? 'Editar Foto' : 'Foto de perfil'}
                 </label>
                 <input
-                  id="photo"
-                  name="photo"
+                  id="foto"
+                  name="foto"
                   type="file"
                   accept="image/*"
                   onChange={(event) => handlePhotoChange(event, setFieldValue)}
@@ -174,10 +172,10 @@ function UserForm() {
               </div>
               <div className="form-columns">
                 <div className="form-column">
-                  <InputText label="Nombre" name="name" required />
-                  <InputText label="Apellido" name="last_name" required />
-                  <InputText label="Usuario" name="username" required />
-                  <InputText label="Teléfono" name="phone" required />
+                  <InputText label="Nombre" name="nombre" required />
+                  <InputText label="Apellido" name="apellido" required />
+                  <InputText label="Usuario" name="usuario" required />
+                  <InputText label="Cédula de Identidad" name="ci" required />
                 </div>
                 <div className="form-column">
                   <InputText
@@ -193,8 +191,9 @@ function UserForm() {
                     required={!editingUser}
                   />
                   <InputText label="Correo Electrónico" name="email" required />
-                  <Select label="Roles" name="role" required>
-                    <option value="">Seleccione un tipo de usuario</option>
+                  <InputText label="Profesión" name="profesion" required />
+                  <Select label="Roles" name="roleIds" multiple required>
+                    <option value="">Seleccione un rol</option>
                     {roles.map((rol) => (
                       <option key={rol.value} value={rol.value}>
                         {rol.label}

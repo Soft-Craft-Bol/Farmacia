@@ -28,7 +28,7 @@ export const deleteUser = (id) => api.delete(`/users/${id}`);
 export const getRoles = () => api.get('/auth/roles');
 
 
-export const addUser = (data) => api.post('/users', data);
+export const addUser = (data) => api.post('/auth/register', data);
 export const updateUser = (id, data) => api.put(`/users/${id}`, data);
 export const getUserById = (id) => api.get(`/users/${id}`);
 
