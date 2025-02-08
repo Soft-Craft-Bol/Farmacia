@@ -32,3 +32,8 @@ export const addUser = (data) => api.post('/auth/register', data);
 export const updateUser = (id, data) => api.put(`/users/${id}`, data);
 export const getUserById = (id) => api.get(`/users/${id}`);
 
+export const createTeam = (data) => api.post('/teams/create', data);
+export const addUsersToTeam = (data) => api.post('/teams/add-users', data);
+export const getTeamsWithUsers = () => api.get('/teams/teams-with-users');
+export const removeUserFromTeam = (teamId, userId) => api.delete(`/teams/remove-user/${teamId}/${userId}`);
+
