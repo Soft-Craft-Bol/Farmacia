@@ -21,30 +21,34 @@ const upload = multer({ storage });
 // Registrar nuevo usuario
 exports.register = async (req, res) => {
     try {
-        const { nombre, apellido, usuario, email, password, ci, profesion, areaId, role } = req.body;
+        const { nombre, apellido, usuario, email, password, ci, profesion, areaId, role, foto } = req.body;
         
-        // Verificar si se subió una foto
-        const foto = req.file ? req.file.path : null;
+        let fotoUrl = foto || null; // Si se envía la URL en JSON, se usa directamente.
 
-        if (!foto) {
-            return res.status(400).json({ error: 'La foto es requerida' });
+        // Si el usuario subió un archivo, subirlo a Cloudinary
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path);
+            fotoUrl = result.secure_url; // Ahora tenemos la URL real de Cloudinary
+        }
+
+        // Si no hay URL ni archivo, error
+        if (!fotoUrl) {
+            return res.status(400).json({ error: "La foto es requerida" });
         }
 
         // Hashear contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Verificar si el rol existe
-        const roles = await prisma.role.findMany({
-            where: {
-                id: role // Aquí buscamos un solo rol
-            }
+        const roleExists = await prisma.role.findUnique({
+            where: { id: Number(role) }
         });
 
-        if (roles.length !== 1) {
+        if (!roleExists) {
             return res.status(400).json({ error: 'El rol no existe' });
         }
 
-        // Crear el usuario
+        // Crear usuario en la base de datos
         const user = await prisma.user.create({
             data: {
                 nombre,
@@ -54,12 +58,10 @@ exports.register = async (req, res) => {
                 password: hashedPassword,
                 ci,
                 profesion,
-                foto,  // Guardar URL de Cloudinary
+                foto: fotoUrl, // Ahora guarda la URL correctamente
                 areaId: Number(areaId),
                 roles: {
-                    create: [{
-                        role: { connect: { id: Number(role) } }
-                    }]
+                    create: [{ role: { connect: { id: Number(role) } } }]
                 }
             },
             include: {
@@ -67,12 +69,13 @@ exports.register = async (req, res) => {
             }
         });
 
-        res.json(user);
+        res.status(201).json(user);
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ error: 'Error al registrar usuario' });
+        console.error("🔥 ERROR en register():", error);
+        res.status(400).json({ error: error.message });
     }
 };
+
 
 
 // Obtener perfil de usuario
@@ -83,6 +86,7 @@ exports.getProfile = async (req, res) => {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             include: {
+                area: true,
                 roles: { include: { role: true } },
             },
         });
@@ -100,7 +104,7 @@ exports.getProfile = async (req, res) => {
             ci: user.ci,
             profesion: user.profesion,
             foto: user.foto,
-            area: user.areaId, 
+            nombre: user.area.nombre,
             roles: user.roles.map(r => r.role.nombre),
         };
   

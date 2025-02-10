@@ -25,6 +25,17 @@ model Equipo {
   proveedor        String
   numeroOrden      String
   fotoUrl          String?  
+  documentoUrl     String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  componentes      ComponenteEquipo[]
+}
+
+model ComponenteEquipo {
+  id         Int     @id @default(autoincrement())
+  nombre     String
+  equipoId   Int
+  equipo     Equipo  @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
 }

@@ -85,7 +85,18 @@ body.dark .content {
   text-align: left;
   justify-content: center;
 }
-
+.info-columns {
+  display: flex;
+  justify-content: space-between; /* Distribuye las columnas uniformemente */
+  gap: 20px; /* Espacio entre columnas */
+  margin-top: 20px;
+}
+.info-column {
+  flex: 1; /* Ocupa el mismo ancho */
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Espaciado entre los elementos de cada columna */
+}
 .info-group {
   display: flex;
   align-items: center;

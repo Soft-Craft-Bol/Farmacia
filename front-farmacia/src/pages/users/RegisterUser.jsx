@@ -193,7 +193,7 @@ function UserForm() {
                   />
                   <InputText label="Correo Electrónico" name="email" required />
                   <InputText label="Profesión" name="profesion" required />
-                  <Select label="Roles" name="role" required>  {/* Aquí cambiamos a un solo rol */}
+                  <Select label="Roles" name="role" required>  
                     <option value="">Seleccione un rol</option>
                     {roles.map((rol) => (
                       <option key={rol.value} value={rol.value}>

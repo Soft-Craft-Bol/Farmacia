@@ -36,7 +36,7 @@ const EquiposList = () => {
     <div className="equipos-container">
       {/* Botón de agregar equipo */}
       <button className="add-equipo-btn" onClick={() => navigate("/equipos/register")}>
-        <FiPlusCircle /> Agregar Equipo
+        <FiPlusCircle  />Agregar Equipo
       </button>
 
       {/* Lista de equipos */}
@@ -50,7 +50,8 @@ const EquiposList = () => {
                 <h3>{equipo.etiquetaActivo}</h3>
                 <div className="equipo-foto">
                   {equipo.fotoUrl ? (
-                    <img src={equipo.fotoUrl} alt={equipo.modelo} />
+                    // <img src={equipo.fotoUrl} alt={equipo.modelo} />
+                    <img src={`http://localhost:4000${equipo.fotoUrl}`} alt={equipo.modelo} />
                   ) : (
                     <div className="placeholder">Sin imagen</div>
                   )}

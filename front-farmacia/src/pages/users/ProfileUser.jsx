@@ -5,6 +5,7 @@ import { IoIosMail } from "react-icons/io";
 import { FaIdCard } from "react-icons/fa6";
 import { MdWorkspaces } from "react-icons/md";
 import { FaUserGroup } from "react-icons/fa6";
+import { RiUser2Fill } from "react-icons/ri";
 
 export default function UserProfile() {
   const [user, setUser] = useState(null);
@@ -88,17 +89,23 @@ export default function UserProfile() {
           </div>
           
         </div>
-            <div className="info-group">
-              <MdWorkspaces className="meta-icon" />
-              <span className="meta-text">Área: {user.area}</span>
-            </div>
+              <div className="info-group">
+                <MdWorkspaces className="meta-icon" />
+                <span className="meta-text">
+                  Área: {user.nombre}
+                </span>
+              </div>
             <div className="info-group">
               <FaIdCard className="meta-icon" />
               <span className="meta-text">CI: {user.ci}</span>
             </div>
             <div className="info-group">
               <FaUserGroup className="meta-icon" />
-              <span className="meta-text">{user.roles ? user.roles.join(", ") : "Sin roles"}</span>
+              <span className="meta-text">Roles: {user.roles ? user.roles.join(", ") : "Sin roles"}</span>
+            </div>
+            <div className="info-group">
+              <RiUser2Fill className="meta-icon" />
+              <span className="meta-text">Profesion:  {user.profesion}</span>
             </div>
       </div>
     </div>

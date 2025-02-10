@@ -7,6 +7,7 @@ import './EquipoForm.css';
 import InputText from '../../components/inputs/InputText';
 import Select from '../../components/select/Select';
 import { ButtonPrimary } from '../../components/buttons/ButtonPrimary';
+import { FaCirclePlus } from "react-icons/fa6";
 
 const EquipoForm = () => {
   const [initialValues, setInitialValues] = useState({
@@ -22,8 +23,13 @@ const EquipoForm = () => {
     fotoUrl: '',
   });
   const [file, setFile] = useState(null);
+  const [documentFile, setDocumentFile] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [preguntas, setPreguntas] = useState([]);
+  const [nuevaPregunta, setNuevaPregunta] = useState('');
+  const [modalAbierto, setModalAbierto] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -49,11 +55,22 @@ const EquipoForm = () => {
       fetchEquipo();
     }
   }, [id]);
+  const agregarPregunta = () => {
+    if (nuevaPregunta.trim() !== '') {
+      setPreguntas([...preguntas, nuevaPregunta]);
+      setNuevaPregunta('');
+      setModalAbierto(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
   };
+  const handleFileDocumentChange = (e) => {
+    const selectedDocument = e.target.files[0];
+    setDocumentFile(selectedDocument);
+};
 
   const handleSubmit = async (values) => {
     const formData = new FormData();
@@ -66,8 +83,9 @@ const EquipoForm = () => {
     formData.append('fechaCompra', values.fechaCompra);
     formData.append('proveedor', values.proveedor);
     formData.append('numeroOrden', values.numeroOrden);
+    formData.append('componentes', JSON.stringify(preguntas));
     if (file) formData.append('foto', file);
-
+    if (documentFile) formData.append('documento', documentFile)
     try {
       if (id) {
         await updateEquipo(id, formData);
@@ -115,8 +133,9 @@ const EquipoForm = () => {
           <InputText label="Ubicación" name="ubicacion" required />
           <Select label="Tipo de Mantenimiento" name="tipoMantenimiento" required>
             <option value="">Selecciona un tipo</option>
-            <option value="Preventivo">Preventivo</option>
-            <option value="Correctivo">Correctivo</option>
+            <option value="Preventivo">Mantenimiento Interno</option>
+            <option value="Tercerizado">Mantenimiento Tercerizado</option>
+            <option value="Garantía">Mantenimiento por Garantía</option>
           </Select>
           <InputText label="Fecha de Compra" name="fechaCompra" type="date" required />
           <InputText label="Proveedor" name="proveedor" required />
@@ -134,10 +153,42 @@ const EquipoForm = () => {
               <img src={initialValues.fotoUrl} alt="Imagen actual" />
             )}
           </div>
-
-          <ButtonPrimary type="submit" variant="primary">
-            {id ? 'Actualizar' : 'Registrar'}
-          </ButtonPrimary>
+          <div className="file-upload">
+            <label>Documentación del Equipo (PDF, DOCX, XLSX)</label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              onChange={handleFileDocumentChange}
+            />
+            {documentFile && <p>Archivo seleccionado: {documentFile.name}</p>}
+          </div>
+          <button className="open-modal-btn" onClick={() => setModalAbierto(true)}> <FaCirclePlus className="icon-plus" /> Agregar Componentes del equipo</button>
+          <ul className="component-list">
+            {preguntas.map((pregunta, index) => (
+              <li key={index} className="component-item" >{pregunta} </li>
+            ))}
+          </ul>
+          {modalAbierto && (
+            <div className="modal">
+              <div className="modal-content">
+                <h3 className="modal-title">Agregar Componente</h3>
+                <input
+                  type="text"
+                  value={nuevaPregunta}
+                  onChange={(e) => setNuevaPregunta(e.target.value)}
+                  placeholder="Escribe el nombre del componente..."
+                  className="modal-input"
+                />
+                <div className="modal-buttons">
+                  <button className="btn add-btn" onClick={agregarPregunta}>Agregar</button>
+                  <button className="btn close-btn" onClick={() => setModalAbierto(false)}>Cerrar</button>
+                </div>
+              </div>
+            </div>
+          )}
+            <ButtonPrimary type="submit" variant="primary">
+              {id ? 'Actualizar' : 'Registrar'}
+            </ButtonPrimary>
         </Form>
       </Formik>
     </div>
