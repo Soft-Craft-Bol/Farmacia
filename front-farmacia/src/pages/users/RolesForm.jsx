@@ -55,26 +55,32 @@ const RolesForm = () => {
   };
   const handleAssignRole = async () => {
     if (!selectedUser || !selectedRole) {
-      alert("Debes seleccionar un usuario y un rol.");
+      // alert("Debes seleccionar un usuario y un rol.");
       return;
     }
 
     try {
       await assignRoleToUser({ userId: selectedUser, roleId: selectedRole });
-      alert("Rol asignado correctamente.");
+      // alert("Rol asignado correctamente.");
       cargarUsuarios();
     } catch (error) {
       console.error("Error al asignar rol:", error);
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const permisosNumericos = permisos.map(p => parseInt(p, 10));
+      // const permisosNumericos = permisos.map(p => parseInt(p, 10));
+      const permisosNumericos = permisos
+      .map(p => parseInt(p, 10))
+      .filter(p => !isNaN(p));  // Filtra cualquier NaN
+
+      console.log("Nombre:", nombre);
+      console.log("Permisos enviados:", permisosNumericos);
     //   await createRole({ nombre, codigo, permisos });
       await createRole({ nombre, permisos: permisosNumericos });
-      alert("Rol creado correctamente");
+      // alert("Rol creado correctamente");
       setNombre("");
       setCodigo("");
       setPermisos([]);
@@ -87,7 +93,7 @@ const RolesForm = () => {
   const handleDeleteRole = async (id) => {
     try {
       await deleteRole(id);
-      alert("Rol eliminado correctamente");
+      // alert("Rol eliminado correctamente");
       cargarRoles(); 
     } catch (error) {
       console.error("Error al eliminar el rol:", error);
@@ -103,9 +109,9 @@ const RolesForm = () => {
 
         <label>Permisos:</label>
         <select onChange={(e) => togglePermiso(e.target.value)}>
-          <option>Selecciona un permiso</option>
+          {/* <option>Selecciona un permiso</option> */}
           {todosLosPermisos.map((permiso) => (
-            <option key={permiso.id} value={permiso.nombre}>{permiso.nombre}</option>
+            <option key={permiso.id} value={permiso.id}>{permiso.nombre}</option>
           ))}
         </select>
 
