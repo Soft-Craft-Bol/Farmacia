@@ -46,22 +46,24 @@ const RolesForm = () => {
     }
   }
 
-  const togglePermiso = (permiso) => {
+  const togglePermiso = (permisoId) => {
+    const permisoSeleccionado = todosLosPermisos.find(p => p.id === parseInt(permisoId, 10));
+    if (!permisoSeleccionado) return; 
+  
     setPermisos((prevPermisos) =>
-      prevPermisos.includes(permiso)
-        ? prevPermisos.filter((p) => p !== permiso)
-        : [...prevPermisos, permiso]
+      prevPermisos.some(p => p.id === permisoSeleccionado.id)
+        ? prevPermisos.filter((p) => p.id !== permisoSeleccionado.id)
+        : [...prevPermisos, permisoSeleccionado]
     );
   };
+  
   const handleAssignRole = async () => {
     if (!selectedUser || !selectedRole) {
-      // alert("Debes seleccionar un usuario y un rol.");
       return;
     }
 
     try {
       await assignRoleToUser({ userId: selectedUser, roleId: selectedRole });
-      // alert("Rol asignado correctamente.");
       cargarUsuarios();
     } catch (error) {
       console.error("Error al asignar rol:", error);
@@ -70,25 +72,28 @@ const RolesForm = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    const permisosIds = permisos.map(p => p.id);
+  
+    console.log("Nombre:", nombre);
+    console.log("Permisos enviados:", permisosIds);
+  
+    if (permisosIds.length === 0) {
+      alert("Debes seleccionar al menos un permiso.");
+      return;
+    }
+  
     try {
-      // const permisosNumericos = permisos.map(p => parseInt(p, 10));
-      const permisosNumericos = permisos
-      .map(p => parseInt(p, 10))
-      .filter(p => !isNaN(p));  // Filtra cualquier NaN
-
-      console.log("Nombre:", nombre);
-      console.log("Permisos enviados:", permisosNumericos);
-    //   await createRole({ nombre, codigo, permisos });
-      await createRole({ nombre, permisos: permisosNumericos });
-      // alert("Rol creado correctamente");
+      await createRole({ nombre, permisos: permisosIds });
+      alert("Rol creado correctamente");
       setNombre("");
-      setCodigo("");
       setPermisos([]);
-      cargarRoles(); 
+      cargarRoles();
     } catch (error) {
       console.error("Error al crear el rol:", error);
     }
   };
+  
 
   const handleDeleteRole = async (id) => {
     try {
@@ -121,8 +126,8 @@ const RolesForm = () => {
                 <p>No has seleccionado permisos aún.</p>
             ) : (
                 permisos.map((permiso, index) => (
-                <span key={index} className="permiso-item" onClick={() => togglePermiso(permiso)}>
-                    {permiso} 
+                <span key={index} className="permiso-item" onClick={() => togglePermiso(permiso.id)}>
+                    {permiso.nombre} 
                     <IoCloseOutline size={20} color="red" />
                 </span>
                 ))
