@@ -104,7 +104,7 @@ exports.getProfile = async (req, res) => {
             ci: user.ci,
             profesion: user.profesion,
             foto: user.foto,
-            nombre: user.area.nombre,
+            nombre: user.area ? user.area.nombre : null,
             roles: user.roles.map(r => r.role.nombre),
         };
   

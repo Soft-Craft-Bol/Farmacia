@@ -13,6 +13,7 @@ const FormTeams = lazy(() => import("../pages/formTeam/formTeam"));
 const AllUsers = lazy(() => import("../pages/allUsers/AllUsers"));
 const EquipoList = lazy(() => import("../pages/equipos/EquiposList"));
 const EquipoForm = lazy(() => import("../pages/equipos/EquipoForm"));
+const RolesForm = lazy(() => import("../pages/users/RolesForm"));
 
 const AppRoutes = () => (
   <Routes>
@@ -29,8 +30,8 @@ const AppRoutes = () => (
     <Route path="/editUser/:id" element={<PrivateRoute><UserForm /></PrivateRoute>} />
     <Route path="/equipos/register" element={<PrivateRoute><EquipoForm /></PrivateRoute>} />
     <Route path="/equipos" element={<PrivateRoute><EquipoList /></PrivateRoute>} />
-
-
+    {/* <Route path="/roles" element={<PrivateRoute allowedRoles={["Administrador"]}><RolesForm /></PrivateRoute>} /> */}
+    <Route path="/roles" element={<PrivateRoute allowedRoles={["Administrador"]}><RolesForm /></PrivateRoute>} />
   </Routes>
 );
 

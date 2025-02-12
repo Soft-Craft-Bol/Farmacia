@@ -14,7 +14,11 @@ const SidebarHeader = ({ onToggle, isOpen }) => {
 
   useEffect(() => {
     getUserProfile()
-      .then((response) => setCurrentUser(response.data))
+      .then((userData) => { 
+        if (userData) {
+          setCurrentUser(userData);
+        }
+      })
       .catch((error) => console.error("Error al obtener el perfil:", error));
   }, []);
 
@@ -23,9 +27,10 @@ const SidebarHeader = ({ onToggle, isOpen }) => {
   return (
     <header className="sidebar-header">
       <div className="text logo">
+        {/* {console.log("✅ Datos obtenidos del usuario:", currentUser?.usuario)} */}
         <img
           className="logo-perfil"
-          src={currentUser?.foto || "https://via.placeholder.com/150"}
+          src={currentUser?.foto ? currentUser.foto : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser?.usuario )}`}
           alt="Perfil"
         />
         <span className="name">
@@ -94,6 +99,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <SidebarLink to="/calendar" icon={<FaCalendarAlt />} text="Calendario" />
             <SidebarLink to="/equipos" icon={<GrAnalytics />} text="Equipos" />
             <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />
+            <SidebarLink to="/roles" icon={<AiOutlineGroup />} text="Roles" />
           </ul>
         </div>
         <div className="bottom-content">

@@ -29,13 +29,10 @@ function LoginUser() {
   const handleSubmit = useCallback(async (values, { setSubmitting }) => {
     setLoginError(""); // Limpiar errores previos
     try {
-      console.log("Enviando credenciales:", values); // Depuración
 
       const result = await loginUser(values);
-      console.log("Respuesta del servidor:", result); // Depuración
 
       if (result && result.data && result.data.token) {
-        console.log("Token recibido:", result.data.token); // Depuración
 
         // Guardar el token en localStorage
         saveToken(result.data.token);
@@ -51,9 +48,6 @@ function LoginUser() {
 
         saveUser(user);
         localStorage.setItem("user", JSON.stringify(user)); // Guardar usuario en localStorage
-
-        console.log("Token guardado en localStorage:", localStorage.getItem("token"));
-        console.log("Usuario guardado en localStorage:", localStorage.getItem("user"));
 
         navigate("/home");
       } else {

@@ -73,5 +73,74 @@
   input[type="file"] {
     display: none;
   }
+
+  /* Contenedor general */
+.agregar-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-content: flex-start; 
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Input de información */
+.input-info {
+  width: 200px;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.input-info:focus {
+  border-color: #007bff;
+  box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Botón para agregar información */
+.open-modal-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.open-modal-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Icono dentro del botón */
+.icon-plus {
+  font-size: 18px;
+}
+
+/* Lista de información */
+.component-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 15px;
+  text-align: left;
+}
+
+.component-item {
+  background-color: #f8f9fa;
+  padding: 8px 15px;
+  border-radius: 5px;
+  margin: 5px 0;
+  max-width: 300px;
+  font-size: 16px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
   
  

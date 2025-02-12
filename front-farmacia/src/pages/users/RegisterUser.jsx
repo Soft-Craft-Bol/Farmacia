@@ -10,6 +10,7 @@ import { useTheme } from '../../context/ThemeContext';
 import './RegisterUser.css';
 import Select from '../../components/select/Select';
 import { ButtonPrimary } from '../../components/buttons/ButtonPrimary';
+import { FaCirclePlus } from "react-icons/fa6";
 
 function UserForm() {
   const navigate = useNavigate();
@@ -138,7 +139,14 @@ function UserForm() {
       setPhotoPreview(null);
     }
   };
-
+  const [camposExtras, setCamposExtras] = useState([]); // Lista de información adicional
+  const [nuevoCampo, setNuevoCampo] = useState("");
+  const agregarCampo = () => {
+    if (nuevoCampo.trim() !== "") {
+      setCamposExtras([...camposExtras, nuevoCampo]);
+      setNuevoCampo(""); // Limpiar el input después de agregar
+    }
+  };
   return (
     <div className={`user-form-container ${theme}`}>
       <Toaster duration={2000} position="bottom-right" />
@@ -177,6 +185,14 @@ function UserForm() {
                   <InputText label="Apellido" name="apellido" required />
                   <InputText label="Usuario" name="usuario" required />
                   <InputText label="Cédula de Identidad" name="ci" required />
+                  <Select label="Roles" name="role" required>  
+                    <option value="">Seleccione un rol</option>
+                    {roles.map((rol) => (
+                      <option key={rol.value} value={rol.value}>
+                        {rol.label}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
                 <div className="form-column">
                   <InputText
@@ -193,16 +209,29 @@ function UserForm() {
                   />
                   <InputText label="Correo Electrónico" name="email" required />
                   <InputText label="Profesión" name="profesion" required />
-                  <Select label="Roles" name="role" required>  
-                    <option value="">Seleccione un rol</option>
-                    {roles.map((rol) => (
-                      <option key={rol.value} value={rol.value}>
-                        {rol.label}
-                      </option>
-                    ))}
-                  </Select>
+                  
                 </div>
               </div>
+              <div className="agregar-info-container">
+                <input
+                  type="text"
+                  value={nuevoCampo}
+                  onChange={(e) => setNuevoCampo(e.target.value)}
+                  placeholder="Escribe información adicional..."
+                  className="input-info"
+                />
+                <button className="open-modal-btn" onClick={agregarCampo}>
+                  <FaCirclePlus className="icon-plus" /> </button>
+              </div>
+
+              {/* Lista de Información Agregada */}
+              <ul className="component-list">
+                {camposExtras.map((info, index) => (
+                  <li key={index} className="component-item">
+                    {info}
+                  </li>
+                ))}
+              </ul>
             </div>
             <ButtonPrimary
               variant="primary"

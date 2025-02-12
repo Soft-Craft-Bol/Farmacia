@@ -25,9 +25,12 @@ const uploadMiddleware = multer({ storage })
 
 
 const registrarEquipo = async (req, res) => {
-  console.log("📸 Archivos recibidos:", req.files);
     try {
         const { etiquetaActivo, numeroSerie, modelo, estado, ubicacion, tipoMantenimiento, fechaCompra, proveedor, numeroOrden, componentes } = req.body;
+
+        const equipoExistente = await prisma.equipo.findUnique({
+            where: { etiquetaActivo }
+        })
 
         let fotoUrl = req.files['foto'] ? `/uploads/images/${req.files['foto'][0].filename}` : null;
         let documentoUrl = req.files['documento'] ? `/uploads/documents/${req.files['documento'][0].filename}` : null;
@@ -64,6 +67,10 @@ const registrarEquipo = async (req, res) => {
 
         res.status(201).json(equipo);
     } catch (error) {
+      if (error.code === 'P2002') {
+        return res.status(400).json({ error: "La etiqueta de activo ya existe. Usa una diferente." });
+      }
+        console.error("🔥 Error al registrar equipo:", error);
         res.status(500).json({ error: error.message });
     }
 };

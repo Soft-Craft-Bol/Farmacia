@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const teamRoutes = require('./routes/team.routes');
+const roleRoutes = require('./routes/roles.routes');
 require('dotenv').config();
 
 const app = express();
@@ -22,5 +23,5 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/api/teams', teamRoutes);
-
+app.use("/auth/roles", roleRoutes);
 module.exports = app;

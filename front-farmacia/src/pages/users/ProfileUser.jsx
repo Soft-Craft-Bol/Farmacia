@@ -13,7 +13,6 @@ export default function UserProfile() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log(localStorage.getItem("token"));
 
     if (!token) {
       setError("No token found. Please log in.");

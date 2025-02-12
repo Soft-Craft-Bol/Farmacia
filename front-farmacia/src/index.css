@@ -30,7 +30,7 @@
 body {
   min-height: 100vh;
   background-color: var(--body-color);
-  color: var(--text-color);
+  /* color: var(--text-color); */
   transition: var(--tran-05);
 }
 
@@ -39,11 +39,9 @@ body.dark {
   --sidebar-color: var(--color-medium);
   --primary-color-light: #3cf30f;
   --primary-color: var(--primary-color);
-  --toggle-color: #FFFFFF;
+  --toggle-color: #273142;
   --text-color: #CCCCCC;
-  --text-color-secundary: #8a8787;
-
-  
+  --text-color-secundary: #8a8787; 
 }
 
 /* Selection Styling */
