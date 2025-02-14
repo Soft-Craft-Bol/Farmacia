@@ -30,7 +30,7 @@ const SidebarHeader = ({ onToggle, isOpen }) => {
         {/* {console.log("✅ Datos obtenidos del usuario:", currentUser?.usuario)} */}
         <img
           className="logo-perfil"
-          src={currentUser?.foto ? currentUser.foto : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser?.usuario )}`}
+          src={currentUser?.foto ? currentUser.foto : `https://hwchamber.co.uk/wp-content/uploads/2022/04/avatar-placeholder.gif`}
           alt="Perfil"
         />
         <span className="name">
