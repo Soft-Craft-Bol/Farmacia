@@ -15,6 +15,13 @@ const apiEquipos = axios.create({
   timeout: 10000
 });
 
+const apiTrabajos = axios.create({
+  baseURL: "http://localhost:7000",
+  responseType: 'json',
+  withCredentials: true,
+  timeout: 10000
+});
+
 const authInterceptor = (config) => {
   const token = getToken();
   if (token) {
@@ -67,3 +74,11 @@ export const deleteRole = (id) => apiUsers.delete(`/auth/roles/${id}`);
 export const updateRole = (id, data) => apiUsers.put(`/auth/roles/${id}`, data); 
 export const assignRoleToUser = (userId, roleId) =>apiUsers.put(`/auth/assign-role/${userId}`, { roleId });
 export const getPermissions = () => apiUsers.get('/auth/roles/permisos');
+
+
+
+export const createTrabajo = (data) => apiTrabajos.post('/trabajos', data);
+export const getTrabajos = () => apiTrabajos.get('/trabajos');
+export const getTrabajoById = (id) => apiTrabajos.get(`/trabajos/${id}`);
+export const addUsersToTrabajo = (trabajoId, users) => apiTrabajos.post(`/trabajos/${trabajoId}/equipos`, { users });
+export const removeUserFromTrabajo = (trabajoId, userId) => apiTrabajos.delete(`/trabajos/${trabajoId}/equipos/${userId}`);

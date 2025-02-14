@@ -97,3 +97,4 @@ model UserTeam {
   @@unique([userId, teamId]) // Evita que un usuario esté duplicado en un equipo
 }
 
+

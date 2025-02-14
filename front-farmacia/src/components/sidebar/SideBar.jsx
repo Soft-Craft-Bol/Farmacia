@@ -100,6 +100,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <SidebarLink to="/equipos" icon={<GrAnalytics />} text="Equipos" />
             <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />
             <SidebarLink to="/roles" icon={<AiOutlineGroup />} text="Roles" />
+            <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Crear Trabajo" />
+            <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Listar Trabajos" />
           </ul>
         </div>
         <div className="bottom-content">
