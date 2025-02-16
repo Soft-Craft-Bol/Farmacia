@@ -1,17 +1,17 @@
 export const initialColumns = {
   todo: {
     id: "todo",
-    title: "To-Do",
+    title: "Por Hacer",
     taskIds: ["1", "2", "3"],
   },
   inProgress: {
     id: "inProgress",
-    title: "In Progress",
+    title: "En Progreso",
     taskIds: ["4"],
   },
   done: {
     id: "done",
-    title: "Done",
+    title: "Finalizado",
     taskIds: [],
   },
 };

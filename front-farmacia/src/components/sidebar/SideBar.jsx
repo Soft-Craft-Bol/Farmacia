@@ -7,6 +7,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { signOut, getUser } from '../../pages/login/authFuntions';
 import { FaUserCircle } from 'react-icons/fa';
 import { getUserProfile } from '../../service/api';
+import { BsKanban } from "react-icons/bs";
 
 
 const SidebarHeader = ({ onToggle, isOpen }) => {
@@ -97,11 +98,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
             <SidebarLink to="/allUsers" icon={<PiUsersFourDuotone />} text="Todos los usuarios" />
             <SidebarLink to="/calendar" icon={<FaCalendarAlt />} text="Calendario" />
+            <SidebarLink to="/trabajos/taskboard" icon={<BsKanban  />} text="Tablero Kanban" />
             <SidebarLink to="/equipos" icon={<GrAnalytics />} text="Equipos" />
             <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />
             <SidebarLink to="/roles" icon={<AiOutlineGroup />} text="Roles" />
             <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Crear Trabajo" />
             <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Listar Trabajos" />
+
           </ul>
         </div>
         <div className="bottom-content">
