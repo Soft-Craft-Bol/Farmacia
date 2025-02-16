@@ -11,6 +11,9 @@ model Trabajo {
   id          Int             @id @default(autoincrement())
   nombre      String
   descripcion String?
+  fechaInicio  DateTime
+  fechaFin     DateTime?
+  encargadoId  String
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   equipos     TrabajoEquipo[]

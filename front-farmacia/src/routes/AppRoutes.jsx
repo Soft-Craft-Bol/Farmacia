@@ -18,6 +18,8 @@ const TrabajoForm = lazy(() => import("../pages/users/TrabajoForm"));
 const TrabajoList = lazy(() => import("../pages/users/TrabajoList"));
 const TrabajoAddUsers = lazy(() => import("../pages/users/TrabajoAddUsers")); 
 const TrabajoUserList = lazy(() => import("../pages/users/TrabajoUserList"));
+const Taskboard = lazy(() => import("../pages/trabajos/Taskboardtask.jsx"));
+
 
 const AppRoutes = () => (
   <Routes>
@@ -40,6 +42,7 @@ const AppRoutes = () => (
     <Route path="/trabajos/register" element={<PrivateRoute><TrabajoForm /></PrivateRoute>} />
     <Route path="/trabajos/:trabajoId/add-users" element={<PrivateRoute><TrabajoAddUsers /></PrivateRoute>} />
     <Route path="/trabajos/:trabajoId/users" element={<PrivateRoute><TrabajoUserList /></PrivateRoute>} />
+    <Route path="/trabajos/taskboard" element={<PrivateRoute><Taskboard /></PrivateRoute>} />
   </Routes>
 );
 
