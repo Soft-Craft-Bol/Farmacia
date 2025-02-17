@@ -9,16 +9,16 @@ import "./Taskboardtask.css";
 const Column = ({ column, tasks }) => {
   return (
     <div className="column-container">
-      <div className="column-buttons">
+      <div className="column-header">
         <h2 className="column-title">{column.title}
-        <div className="column-buttons">
+          <div className="column-buttons">
             <button className="icon-button" onClick={() => onEditColumn(column.id)}>
               <GrEdit />
             </button>
             <button className="icon-button" onClick={() => onAddTask(column.id)}>
               <GoPlus />
             </button>
-        </div>
+          </div>
         </h2>
       </div>
       <StrictModeDroppable droppableId={column.id}>

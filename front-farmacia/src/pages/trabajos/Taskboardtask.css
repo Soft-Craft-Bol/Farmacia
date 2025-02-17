@@ -62,8 +62,6 @@
   background: none;
   cursor: pointer;
   font-size: 20px;
-  /* gap:15px; */
-  /* fill: currentColor; */
   transition: transform 0.2s;
 }
 .icon-button:hover {
@@ -76,7 +74,6 @@
 .column-buttons {
   display: flex;
   gap: 10px; 
-  /* justify-content: flex-end;  */
 }
 .column-header {
   padding-block: calc(var(--kendo-spacing-4, 1rem) / 2);
@@ -85,6 +82,6 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between; /* Asegura que los botones estén a la derecha */
+  justify-content: space-between; 
   gap: calc(var(--kendo-spacing-4, 1rem) / 4);
 }
