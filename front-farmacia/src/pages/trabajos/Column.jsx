@@ -1,13 +1,26 @@
 import React from "react";
 import { Draggable } from "react-beautiful-dnd";
 import StrictModeDroppable from "./StrictModeDroppable";
+import { GrEdit } from "react-icons/gr";
+import { GoPlus } from "react-icons/go";
 import Card from "./card";
+import "./Taskboardtask.css";
 
 const Column = ({ column, tasks }) => {
   return (
     <div className="column-container">
-      <h2 className="column-title">{column.title}</h2>
-
+      <div className="column-buttons">
+        <h2 className="column-title">{column.title}
+        <div className="column-buttons">
+            <button className="icon-button" onClick={() => onEditColumn(column.id)}>
+              <GrEdit />
+            </button>
+            <button className="icon-button" onClick={() => onAddTask(column.id)}>
+              <GoPlus />
+            </button>
+        </div>
+        </h2>
+      </div>
       <StrictModeDroppable droppableId={column.id}>
         {(provided) => (
           <div ref={provided.innerRef} {...provided.droppableProps} className="column-tasks">
