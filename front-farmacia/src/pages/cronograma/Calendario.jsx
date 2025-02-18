@@ -15,7 +15,7 @@ const CalendarioMantenimientos = () => {
         const response = await getTrabajos();
         setTrabajos(response.data);
       } catch (error) {
-        console.error("Error al obtener los trabajos:", error);
+        console.error("Error al obtener los trabajos", error);
       }
     };
     fetchTrabajos();
@@ -23,8 +23,7 @@ const CalendarioMantenimientos = () => {
 
   const getEventsForDate = (date) => {
     return trabajos.filter(
-      (trabajo) =>
-        new Date(trabajo.fechaInicio).toDateString() === date.toDateString()
+      (trabajo) => new Date(trabajo.fechaFin).toDateString() === date.toDateString()
     );
   };
 
@@ -37,20 +36,11 @@ const CalendarioMantenimientos = () => {
     setIsModalOpen(false);
   };
 
-  const getColorForTrabajo = (trabajo) => {
-    const colors = {
-      "Pendiente": "highlight-pending",
-      "En Progreso": "highlight-inprogress",
-      "Completado": "highlight-completed"
-    };
-    return colors[trabajo.estado] || "highlight-default";
-  };
-
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
       const eventsThisDay = getEventsForDate(date);
       if (eventsThisDay.length > 0) {
-        return eventsThisDay.map(trabajo => getColorForTrabajo(trabajo)).join(" ");
+        return "highlight-maintenance";
       }
     }
     return null;
@@ -60,8 +50,8 @@ const CalendarioMantenimientos = () => {
 
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
-      <h2>Calendario de Mantenimientos</h2>
       <Calendar onClickDay={handleDayClick} tileClassName={tileClassName} />
+
       {isModalOpen && (
         <div className="modal-backdrop" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -70,17 +60,17 @@ const CalendarioMantenimientos = () => {
               Trabajos para el {selectedDate?.toLocaleDateString("es-ES", {
                 year: "numeric",
                 month: "long",
-                day: "numeric"
+                day: "numeric",
               })}
             </h2>
-            <hr />
+            <hr style={{ margin: "0.5rem 0 1rem 0" }} />
             {eventsOfSelectedDate.length === 0 ? (
               <p>No hay trabajos programados.</p>
             ) : (
-              <ul>
+              <ul style={{ textAlign: "left" }}>
                 {eventsOfSelectedDate.map((trabajo) => (
-                  <li key={trabajo.id} className={getColorForTrabajo(trabajo)}>
-                    <strong>{trabajo.area || "General"}</strong>: {trabajo.nombre} <br />
+                  <li key={trabajo.id} style={{ marginBottom: "0.5rem" }}>
+                    <strong>{trabajo.nombre}</strong>: {trabajo.descripcion} <br />
                     <em>Estado: {trabajo.estado}</em>
                   </li>
                 ))}

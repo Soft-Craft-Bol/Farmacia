@@ -7,21 +7,7 @@ import "./Taskboardtask.css";
 
 const TaskBoardtask = () => {
   const [columns, setColumns] = useState(initialColumns);
-  const [tasks, setTasks] = useState(initialTasks);
-  const [update, setUpdate] = useState(false);
-
-  const handleUpdate = async (id, estado) => {
-    try {
-      await UpdateEstado(id, estado);
-      console.log("Estado actualizado");
-      setUpdate(!update);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-    useEffect(() => {
-      handleUpdate();
-    }, []);
+ 
 
   const onDragEnd = (result) => {
     const { source, destination } = result;
