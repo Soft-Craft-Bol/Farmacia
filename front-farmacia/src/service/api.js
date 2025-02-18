@@ -79,6 +79,8 @@ export const getPermissions = () => apiUsers.get('/auth/roles/permisos');
 
 export const createTrabajo = (data) => apiTrabajos.post('/trabajos', data);
 export const getTrabajos = () => apiTrabajos.get('/trabajos');
+export const deleteTrabajo = (id) => apiTrabajos.delete(`/trabajos/${id}`);
 export const getTrabajoById = (id) => apiTrabajos.get(`/trabajos/${id}`);
 export const addUsersToTrabajo = (trabajoId, users) => apiTrabajos.post(`/trabajos/${trabajoId}/equipos`, { users });
 export const removeUserFromTrabajo = (trabajoId, userId) => apiTrabajos.delete(`/trabajos/${trabajoId}/equipos/${userId}`);
+export const UpdateEstado  = (trabajoId, estado) => apiTrabajos.patch(`/trabajos/${trabajoId}/estado`, { estado });

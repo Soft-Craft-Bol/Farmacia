@@ -1,11 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
+import { UpdateEstado } from "../../service/api";
 import Column from "./Column";
 import { initialColumns, tasks } from "./cards";
 import "./Taskboardtask.css";
 
 const TaskBoardtask = () => {
   const [columns, setColumns] = useState(initialColumns);
+  const [tasks, setTasks] = useState(initialTasks);
+  const [update, setUpdate] = useState(false);
+
+  const handleUpdate = async (id, estado) => {
+    try {
+      await UpdateEstado(id, estado);
+      console.log("Estado actualizado");
+      setUpdate(!update);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+    useEffect(() => {
+      handleUpdate();
+    }, []);
 
   const onDragEnd = (result) => {
     const { source, destination } = result;

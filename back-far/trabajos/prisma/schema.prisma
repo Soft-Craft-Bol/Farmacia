@@ -13,7 +13,9 @@ model Trabajo {
   descripcion String?
   fechaInicio  DateTime
   fechaFin     DateTime?
+  area         String?
   encargadoId  String
+  estado       String          @default("Pendiente")
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   equipos     TrabajoEquipo[]

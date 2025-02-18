@@ -15,10 +15,12 @@ const EquipoList = lazy(() => import("../pages/equipos/EquiposList"));
 const EquipoForm = lazy(() => import("../pages/equipos/EquipoForm"));
 const RolesForm = lazy(() => import("../pages/users/RolesForm"));
 const TrabajoForm = lazy(() => import("../pages/users/TrabajoForm"));
-const TrabajoList = lazy(() => import("../pages/users/TrabajoList"));
+const TrabajoManagement = lazy(() => import("../pages/users/TrabajoList"));
 const TrabajoAddUsers = lazy(() => import("../pages/users/TrabajoAddUsers")); 
 const TrabajoUserList = lazy(() => import("../pages/users/TrabajoUserList"));
 const Taskboard = lazy(() => import("../pages/trabajos/Taskboardtask.jsx"));
+const Cronograma = lazy(() => import("../pages/cronograma/Cronograma"));
+const CalendarioMantenimientos = lazy(() => import("../pages/cronograma/Calendario"));
 
 
 const AppRoutes = () => (
@@ -37,12 +39,15 @@ const AppRoutes = () => (
     <Route path="/equipos/register" element={<PrivateRoute><EquipoForm /></PrivateRoute>} />
     <Route path="/equipos" element={<PrivateRoute><EquipoList /></PrivateRoute>} />
     <Route path="/trabajos/register" element={<PrivateRoute><TrabajoForm /></PrivateRoute>} />
-    <Route path="/trabajos" element={<PrivateRoute><TrabajoList /></PrivateRoute>} />
+    <Route path="/trabajos" element={<PrivateRoute><TrabajoManagement /></PrivateRoute>} />
     <Route path="/roles" element={<PrivateRoute allowedRoles={["Administrador"]}><RolesForm /></PrivateRoute>} />
     <Route path="/trabajos/register" element={<PrivateRoute><TrabajoForm /></PrivateRoute>} />
+
     <Route path="/trabajos/:trabajoId/add-users" element={<PrivateRoute><TrabajoAddUsers /></PrivateRoute>} />
     <Route path="/trabajos/:trabajoId/users" element={<PrivateRoute><TrabajoUserList /></PrivateRoute>} />
     <Route path="/trabajos/taskboard" element={<PrivateRoute><Taskboard /></PrivateRoute>} />
+    <Route path="/trabajos/cronograma" element={<PrivateRoute><Cronograma /></PrivateRoute>} />
+    <Route path="/trabajos/calendario" element={<PrivateRoute><CalendarioMantenimientos /></PrivateRoute>} />
   </Routes>
 );
 

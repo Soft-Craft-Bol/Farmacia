@@ -1,171 +1,79 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createTrabajo, getUsers, addUsersToTrabajo } from '../../service/api';
-import { Toaster, toast } from 'sonner';
-import './TrabajoForm.css';
+import React, { useEffect, useState } from "react";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import "./TrabajoForm.css";
+import { ButtonPrimary } from "../../components/buttons/ButtonPrimary";
+import { getUsers, createTrabajo } from "../../service/api";
+import InputText from "../../components/inputs/InputText";
+import Select from "../../components/select/Select";
 
 const TrabajoForm = () => {
-  const navigate = useNavigate();
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [trabajoCreado, setTrabajoCreado] = useState(false);
-  const [trabajoId, setTrabajoId] = useState(null);
   const [users, setUsers] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState([]);
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const response = await createTrabajo({ nombre, descripcion });
-//       console.log('Respuesta del backend:', response); // Depuración
+  useEffect(() => {
+    getUsers()
+      .then((response) => setUsers(response.data))
+      .catch((error) => console.error("Error fetching users:", error));
+  }, []);
 
-//       if (response && response.data && response.data.id) {
-//         toast.success('Trabajo creado con éxito');
-//         setTrabajoCreado(true);
-//         setTrabajoId(response.data.id);
-//         console.log('ID del trabajo creado:', response.data.id); // Depuración
-//         fetchUsers();
-//       } else {
-//         throw new Error('El ID del trabajo no fue retornado correctamente');
-//       }
-//     } catch (error) {
-//       console.error('Error al crear el trabajo:', error); // Depuración
-//       toast.error('Error al crear el trabajo');
-//     }
-//   };
-
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await createTrabajo({ nombre, descripcion });
-  
-      console.log("Respuesta del backend:", response); // 🔍 Verifica la respuesta completa
-  
-      // Asegurar que response.data existe
-      if (!response || !response.data) {
-        throw new Error("La API no retornó datos válidos.");
-      }
-  
-      console.log("Contenido de response.data:", response.data); // 🔍 Verifica los datos dentro de 'data'
-  
-      const trabajoIdRecibido = response.data.data.id;
-  
-      if (!trabajoIdRecibido) {
-        throw new Error("El ID del trabajo no fue retornado correctamente");
-      }
-  
-      setTrabajoId(trabajoIdRecibido);
-      console.log("ID del trabajo asignado:", trabajoIdRecibido);
-  
-      toast.success("Trabajo creado con éxito");
-      setTrabajoCreado(true);
-      fetchUsers();
-  
-    } catch (error) {
-      console.error("Error al crear el trabajo:", error);
-      toast.error("Error al crear el trabajo");
-    }
-  };
-  
-  
-  const fetchUsers = async () => {
-    try {
-      const response = await getUsers();
-      setUsers(response.data);
-    } catch (error) {
-      toast.error('Error al obtener los usuarios');
-    }
-  };
-
-  const handleCheckboxChange = (userId, role) => {
-    setSelectedUsers((prev) => {
-      const userExists = prev.find((u) => u.userId === userId);
-      if (userExists) {
-        return prev.map((u) =>
-          u.userId === userId ? { ...u, [role]: !u[role] } : u
-        );
-      } else {
-        return [...prev, { userId, [role]: true }];
-      }
-    });
-  };
-
-  const handleAddUsers = async (e) => {
-    e.preventDefault();
-    console.log('ID del trabajo:', trabajoId); // Depuración
-    console.log('Usuarios seleccionados:', selectedUsers); // Depuración
-
-    if (!trabajoId) {
-      toast.error('Error: ID del trabajo no definido');
-      return;
-    }
-
-    try {
-      await addUsersToTrabajo(trabajoId, selectedUsers);
-      toast.success('Usuarios agregados al trabajo correctamente');
-      navigate('/trabajos');
-    } catch (error) {
-      toast.error('Error al agregar usuarios al trabajo');
-    }
-  };
+  const validationSchema = Yup.object({
+    nombre: Yup.string().required("El nombre es obligatorio"),
+    descripcion: Yup.string(),
+    fechaInicio: Yup.date().required("La fecha de inicio es obligatoria"),
+    fechaFin: Yup.date().nullable(),
+    encargadoId: Yup.string().required("El encargado es obligatorio"),
+  });
 
   return (
     <div className="trabajo-form-container">
-      <Toaster duration={2000} position="bottom-right" />
-      <h2>Crear Trabajo</h2>
-      {!trabajoCreado ? (
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Nombre</label>
-            <input
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Descripción</label>
-            <textarea
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit">Crear Trabajo</button>
-        </form>
-      ) : (
-        <div className="add-users-container">
-          <h3>Agregar Usuarios al Trabajo</h3>
-          <form onSubmit={handleAddUsers}>
-            <ul>
+      <h2 className="form-title">Registrar Nuevo Trabajo</h2>
+      <Formik
+        initialValues={{
+          nombre: "",
+          descripcion: "",
+          fechaInicio: "",
+          fechaFin: "",
+          encargadoId: "",
+        }}
+        validationSchema={validationSchema}
+        onSubmit={(values, { setSubmitting, resetForm }) => {
+          createTrabajo(values)
+            .then(() => {
+              alert("Trabajo registrado exitosamente");
+              resetForm();
+            })
+            .catch((error) => {
+              console.error("Error al registrar el trabajo:", error);
+              alert("Hubo un error al registrar el trabajo");
+            })
+            .finally(() => setSubmitting(false));
+        }}
+      >
+        {({ isSubmitting }) => (
+          <Form className="trabajo-form">
+            <InputText label="Nombre" name="nombre" required />
+            <InputText label="Descripción" name="descripcion" type="area" />
+            <InputText label="Fecha de Inicio" name="fechaInicio" type="date" required />
+            <InputText label="Fecha de Fin" name="fechaFin" type="date" />
+            <Select label = "Area" name = "area" required>
+              <option>Seleccione una area</option>
+              <option>Biomedica</option>
+              <option>Informatica</option>
+            </Select>
+            <Select label="Encargado" name="encargadoId" required>
+              <option value="">Seleccione un encargado</option>
               {users.map((user) => (
-                <li key={user.id}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      onChange={(e) =>
-                        handleCheckboxChange(user.id, 'isAdmin', e.target.checked)
-                      }
-                    />
-                    {user.nombre} ({user.email}) - Admin
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      onChange={(e) =>
-                        handleCheckboxChange(user.id, 'isJefe', e.target.checked)
-                      }
-                    />
-                    Jefe de Trabajo
-                  </label>
-                </li>
+                <option key={user.id} value={user.id}>
+                  {user.nombre}
+                </option>
               ))}
-            </ul>
-            <button type="submit">Agregar Usuarios</button>
-          </form>
-        </div>
-      )}
+            </Select>
+            <ButtonPrimary type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creando..." : "Crear Trabajo"}
+            </ButtonPrimary>
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 };

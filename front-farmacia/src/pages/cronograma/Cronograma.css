@@ -1,0 +1,18 @@
+/* Cronograma.css */
+.cronograma-container {
+    margin: 20px;
+    overflow-x: auto; /* opcional, para desplazar en pantallas pequeñas */
+  }
+  
+  .cronograma-tabla {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .cronograma-tabla th,
+  .cronograma-tabla td {
+    border: 1px solid #ccc;
+    text-align: center;
+    padding: 8px;
+  }
+  
