@@ -22,6 +22,7 @@ const TrabajoForm = () => {
     fechaInicio: Yup.date().required("La fecha de inicio es obligatoria"),
     fechaFin: Yup.date().nullable(),
     encargadoId: Yup.string().required("El encargado es obligatorio"),
+    area: Yup.string().required("El area es obligatoria"),
   });
 
   return (
@@ -33,6 +34,7 @@ const TrabajoForm = () => {
           descripcion: "",
           fechaInicio: "",
           fechaFin: "",
+          area: "",
           encargadoId: "",
         }}
         validationSchema={validationSchema}

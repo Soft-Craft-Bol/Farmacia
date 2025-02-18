@@ -6,17 +6,17 @@ const ESTADOS_VALIDOS = ['Pendiente', 'En Progreso', 'Finalizado'];
 
 exports.createTrabajo = async (req, res) => {
   try {
-    const { nombre, descripcion, fechaInicio, fechaFin, encargadoId, estado } = req.body;
-    
+    const { nombre, descripcion, fechaInicio, fechaFin, encargadoId, estado, area } = req.body; // Agregar area
+
     if (estado && !ESTADOS_VALIDOS.includes(estado)) {
       return res.status(400).json({ error: 'Estado inválido' });
     }
-    
+
     const nuevoTrabajo = await prisma.trabajo.create({
       data: {
         nombre,
         descripcion,
-        area,
+        area, // Agregar area aquí
         fechaInicio: new Date(fechaInicio),
         fechaFin: fechaFin ? new Date(fechaFin) : null,
         encargadoId,
@@ -76,7 +76,7 @@ exports.getTrabajoById = async (req, res) => {
  */
 exports.updateTrabajo = async (req, res) => {
   const { trabajoId } = req.params;
-  const { nombre, descripcion, fechaInicio, fechaFin, encargadoId, estado } = req.body;
+  const { nombre, descripcion, fechaInicio, fechaFin, encargadoId, estado, area } = req.body; // Agregar area
 
   if (estado && !ESTADOS_VALIDOS.includes(estado)) {
     return res.status(400).json({ error: 'Estado inválido' });
@@ -88,7 +88,7 @@ exports.updateTrabajo = async (req, res) => {
       data: {
         nombre,
         descripcion,
-        area,
+        area, // Agregar area aquí
         fechaInicio: new Date(fechaInicio),
         fechaFin: fechaFin ? new Date(fechaFin) : null,
         encargadoId,
@@ -105,6 +105,7 @@ exports.updateTrabajo = async (req, res) => {
     return res.status(500).json({ error: 'Error al actualizar el trabajo' });
   }
 };
+
 
 /**
  * Eliminar un trabajo
