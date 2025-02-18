@@ -11,6 +11,7 @@ import './RegisterUser.css';
 import Select from '../../components/select/Select';
 import { ButtonPrimary } from '../../components/buttons/ButtonPrimary';
 import { FaCirclePlus } from "react-icons/fa6";
+import LinkButton from '../../components/buttons/LinkButton';
 
 function UserForm() {
   const navigate = useNavigate();
@@ -209,7 +210,7 @@ function UserForm() {
                   />
                   <InputText label="Correo Electrónico" name="email" required />
                   <InputText label="Profesión" name="profesion" required />
-                  
+                  <LinkButton to="/roles" variant="secondary">Agregar Roles</LinkButton>
                 </div>
               </div>
               <div className="agregar-info-container">
