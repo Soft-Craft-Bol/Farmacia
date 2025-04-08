@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const upload = require('../config/multer');
+const cloudinary = require('../config/cloudinary'); 
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
@@ -100,7 +101,23 @@ exports.updateUser = [
             }
 
             if (req.file) {
-                userData.foto = `/uploads/images/${req.file.filename}`;
+                const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+            
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'users',
+                });
+            
+                userData.foto = result.secure_url;
+            
+                if (existingUser.foto) {
+                    const publicIdMatch = existingUser.foto.match(/\/users\/([^\.\/]+)\./);
+                    if (publicIdMatch) {
+                        const publicId = `users/${publicIdMatch[1]}`;
+                        await cloudinary.uploader.destroy(publicId);
+                    }
+                }
+            
+                fs.unlinkSync(req.file.path);
             }
 
             const updatedUser = await prisma.$transaction(async (tx) => {

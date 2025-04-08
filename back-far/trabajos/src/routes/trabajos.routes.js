@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const upload = require('../middleware/upload.js');
 
 const {
   createTrabajo,
@@ -10,7 +11,7 @@ const {
   updateEstadoTrabajo 
 } = require('../controllers/trabajos.controller.js');
 
-router.post('/', createTrabajo);
+router.post('/', upload.single('imagen'), createTrabajo);
 
 router.post('/:trabajoId/equipos', addUsersToTrabajo);
 
