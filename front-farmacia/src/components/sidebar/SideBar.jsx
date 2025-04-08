@@ -28,14 +28,14 @@ const SidebarHeader = ({ onToggle, isOpen }) => {
   return (
     <header className="sidebar-header">
       <div className="text logo">
-        {/* {console.log("✅ Datos obtenidos del usuario:", currentUser?.usuario)} */}
         <img
           className="logo-perfil"
           src={currentUser?.foto ? currentUser.foto : `https://hwchamber.co.uk/wp-content/uploads/2022/04/avatar-placeholder.gif`}
           alt="Perfil"
         />
         <span className="name">
-           <i>Bienvenido {isAdmin ? "Administrador" : "Usuario"} </i></span> 
+          <i>Bienvenido {isAdmin ? "Administrador" : "Usuario"}</i>
+        </span>
         <span className="profe">{currentUser?.nombre || "Usuario"}</span>
       </div>
       {isOpen ? (
@@ -81,7 +81,10 @@ const SidebarThemeToggle = ({ theme, toggleTheme }) => (
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const { theme, toggleTheme } = useTheme();
   const currentUser = useMemo(() => getUser(), []);
-  /* const isAdmin = useMemo(() => currentUser?.roles.includes("Administrador"), [currentUser]); */
+  const isAdmin = useMemo(() => currentUser?.roles?.includes("Administrador"), [currentUser]);
+  const isInformatico = useMemo(() => currentUser?.roles?.includes("Informático"), [currentUser]);
+  const isDoctor = useMemo(() => currentUser?.roles?.includes("Doctor"), [currentUser]);
+  const isBiomedico = useMemo(() => currentUser?.roles?.includes("Biomédico"), [currentUser]);
 
   return (
     <nav className={`sidebar ${isOpen ? 'open' : 'close'}`}>
@@ -91,17 +94,27 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <ul className="menu-links">
             <SidebarLink to="/profile" icon={<FaUserCircle />} text="Perfil" />
             <SidebarLink to="/home" icon={<FaHome />} text="Dashboard" />
-            <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
-            {/* {isAdmin && (
-              
-            )} */}
-            <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
-            <SidebarLink to="/trabajos/calendario" icon={<FaCalendarAlt />} text="Calendario" />
-            <SidebarLink to="/trabajos/taskboard" icon={<BsKanban  />} text="Tablero de seguimiento" />
-            <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />
-            <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Crear Trabajo" />
-            <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Listar Trabajos" />
-
+            {isAdmin && (
+              <>
+                <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
+                <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
+              </>
+            )}
+            {isInformatico && (
+              <>
+                <SidebarLink to="/trabajos/taskboard" icon={<BsKanban />} text="Tablero de seguimiento" />
+                <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Crear Trabajo" />
+              </>
+            )}
+            {isDoctor && (
+              <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Listar Trabajos" />
+            )}
+            {isBiomedico && (
+              <>
+                <SidebarLink to="/trabajos/calendario" icon={<FaCalendarAlt />} text="Calendario" />
+                <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />
+              </>
+            )}
           </ul>
         </div>
         <div className="bottom-content">
