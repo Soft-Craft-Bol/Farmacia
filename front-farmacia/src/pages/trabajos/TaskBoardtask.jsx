@@ -1,58 +1,134 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
-import { UpdateEstado } from "../../service/api";
+import { UpdateEstado, getTrabajos } from "../../service/api";
 import Column from "./Column";
-import { initialColumns, tasks } from "./cards";
 import "./Taskboardtask.css";
 
 const TaskBoardtask = () => {
-  const [columns, setColumns] = useState(initialColumns);
-  const [tasks, setTasks] = useState(initialTasks);
-  const [update, setUpdate] = useState(false);
-
-  const handleUpdate = async (id, estado) => {
-    try {
-      await UpdateEstado(id, estado);
-      console.log("Estado actualizado");
-      setUpdate(!update);
-    } catch (error) {
-      console.log(error);
+  const [trabajos, setTrabajos] = useState([]);
+  const [columns, setColumns] = useState({
+    pendiente: {
+      id: "pendiente",
+      title: "Pendiente",
+      taskIds: [],
+      color: "#FFC107"
+    },
+    en_progreso: {
+      id: "en_progreso",
+      title: "En Progreso",
+      taskIds: [],
+      color: "#2196F3"
+    },
+    finalizado: {
+      id: "finalizado",
+      title: "Finalizado",
+      taskIds: [],
+      color: "#4CAF50"
     }
-  }
-    useEffect(() => {
-      handleUpdate();
-    }, []);
+  });
 
-  const onDragEnd = (result) => {
-    const { source, destination } = result;
-    if (!destination) return; // Evita soltar fuera de una columna
+  // Cargar trabajos al montar el componente
+  useEffect(() => {
+    const fetchTrabajos = async () => {
+      try {
+        const response = await getTrabajos();
+        setTrabajos(response.data);
+        organizarTrabajosEnColumnas(response.data);
+      } catch (error) {
+        console.error("Error al obtener trabajos:", error);
+      }
+    };
+    fetchTrabajos();
+  }, []);
 
-    const sourceCol = columns[source.droppableId];
-    const destCol = columns[destination.droppableId];
-
-    const sourceTaskIds = [...sourceCol.taskIds];
-    const destTaskIds = source.droppableId === destination.droppableId ? sourceTaskIds : [...destCol.taskIds];
-
-    // 🔹 Extraer el taskId y moverlo
-    const [movedTaskId] = sourceTaskIds.splice(source.index, 1);
-    destTaskIds.splice(destination.index, 0, movedTaskId);
-
-    // 🔹 Actualizar el estado con las nuevas columnas
-    setColumns({
-      ...columns,
-      [source.droppableId]: { ...sourceCol, taskIds: sourceTaskIds },
-      [destination.droppableId]: { ...destCol, taskIds: destTaskIds },
+  // Organizar trabajos por estado
+  const organizarTrabajosEnColumnas = (trabajos) => {
+    const newColumns = { ...columns };
+    
+    Object.keys(newColumns).forEach(colId => {
+      newColumns[colId].taskIds = [];
     });
+
+    trabajos.forEach(trabajo => {
+      const estadoNormalizado = trabajo.estado.toLowerCase().replace(/\s+/g, '_');
+      if (newColumns[estadoNormalizado]) {
+        newColumns[estadoNormalizado].taskIds.push(trabajo.id.toString());
+      }
+    });
+
+    setColumns(newColumns);
   };
 
+  // Manejar el cambio de estado al soltar
+  const onDragEnd = async (result) => {
+    const { source, destination, draggableId } = result;
+    
+    if (!destination) return;
+    if (source.droppableId === destination.droppableId) return;
+
+    try {
+      // Determinar el nuevo estado basado en la columna destino
+      let nuevoEstado;
+      switch(destination.droppableId) {
+        case 'en_progreso':
+          nuevoEstado = 'En Progreso';
+          break;
+        case 'finalizado':
+          nuevoEstado = 'Finalizado';
+          break;
+        default:
+          nuevoEstado = 'Pendiente';
+      }
+
+      // Actualizar el estado en el backend
+      await UpdateEstado(parseInt(draggableId), nuevoEstado);
+
+      // Actualizar el estado localmente
+      const trabajoActualizado = trabajos.find(t => t.id === parseInt(draggableId));
+      if (trabajoActualizado) {
+        trabajoActualizado.estado = nuevoEstado;
+        organizarTrabajosEnColumnas([...trabajos]);
+      }
+    } catch (error) {
+      console.error("Error al actualizar estado:", error);
+      // Revertir visualmente si hay error
+      organizarTrabajosEnColumnas(trabajos);
+    }
+  };
+
+  // Convertir trabajos a formato de tareas para las cards
+  const tasks = trabajos.reduce((acc, trabajo) => {
+    acc[trabajo.id] = {
+      id: trabajo.id,
+      title: trabajo.nombre,
+      description: trabajo.descripcion,
+      area: trabajo.area,
+      fechaInicio: new Date(trabajo.fechaInicio).toLocaleDateString(),
+      fechaFin: trabajo.fechaFin ? new Date(trabajo.fechaFin).toLocaleDateString() : 'Sin fecha fin',
+      priority: {
+        color: columns[trabajo.estado.toLowerCase().replace(/\s+/g, '_')]?.color || '#9E9E9E'
+      }
+    };
+    return acc;
+  }, {});
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="taskboard">
-        {Object.entries(columns).map(([columnId, column]) => (
-          <Column key={columnId} column={column} tasks={tasks} />
-        ))}
-      </div>
-    </DragDropContext>
+    <div className="kanban-container">
+    <h1>Tablero de seguimiento</h1>
+    <span className="kanban-subtitle">Arrastra y suelta para cambiar el estado de los trabajos</span>
+    
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="kanban-board">
+          {Object.values(columns).map(column => (
+            <Column 
+              key={column.id} 
+              column={column} 
+              tasks={tasks} 
+            />
+          ))}
+        </div>
+      </DragDropContext>
+    </div>
   );
 };
 

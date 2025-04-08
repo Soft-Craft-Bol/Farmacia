@@ -1,168 +1,139 @@
-import React, { useState } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import "./CalendarioMantenimientos.css";  // Aquí tenemos nuestras clases extra (opcional)
+import React, { useState, useEffect } from "react";
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { getTrabajos } from "../../service/api";
+import './CalendarioMantenimientos.css';
+
+// Configuración de localización
+moment.locale('es');
+const localizer = momentLocalizer(moment);
 
 const CalendarioMantenimientos = () => {
-  // Datos para cada “tipo” de calendario:
-  const calendarsData = {
-    informatica: [
-      {
-        date: "2025-02-18",
-        area: "Informatica",
-        desc: "Mantenimiento de servidores",
-        resp: "Carlos"
-      },
-      {
-        date: "2025-02-20",
-        area: "Informatica",
-        desc: "Actualización de software",
-        resp: "Laura"
-      }
-    ],
-    biomedica: [
-      {
-        date: "2025-02-18",
-        area: "Biomedica",
-        desc: "Revisión de equipos de rayos X",
-        resp: "Diana"
-      },
-      {
-        date: "2025-02-22",
-        area: "Biomedica",
-        desc: "Mantenimiento de incubadoras",
-        resp: "Mario"
-      }
-    ],
-    general: [
-      {
-        date: "2025-02-18",
-        area: "General",
-        desc: "Inspección general de instalaciones",
-        resp: "Pedro"
-      }
-    ]
-  };
+  const [trabajos, setTrabajos] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const [selectedCalendar, setSelectedCalendar] = useState("informatica");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  useEffect(() => {
+    const fetchTrabajos = async () => {
+      try {
+        const response = await getTrabajos();
+        setTrabajos(response.data);
+      } catch (error) {
+        console.error("Error al obtener los trabajos", error);
+      }
+    };
+    fetchTrabajos();
+  }, []);
 
-  // Retorna los  del calendario actual.
-  // Si la vista es “general” y queremos mezclar datos, podemos combinar arrays.
-  const getCurrentCalendarEvents = () => {
-    if (selectedCalendar === "general") {
-      // Mezclamos informatica + biomedica + general
-      return [
-        ...calendarsData.informatica,
-        ...calendarsData.biomedica,
-        ...calendarsData.general
-      ];
+  // Convertir trabajos a eventos para el calendario
+  const eventos = trabajos.map(trabajo => ({
+    id: trabajo.id,
+    title: `${trabajo.nombre} - ${trabajo.area}`,
+    start: new Date(trabajo.fechaInicio),
+    end: new Date(trabajo.fechaFin),
+    estado: trabajo.estado,
+    descripcion: trabajo.descripcion,
+    encargadoId: trabajo.encargadoId
+  }));
+
+  // Estilos personalizados según el estado
+  const eventStyleGetter = (event) => {
+    let backgroundColor = '';
+    let borderColor = '';
+    
+    if (event.estado === 'Pendiente') {
+      backgroundColor = '#ffd700'; // Amarillo para pendientes
+      borderColor = '#e6c200';
+    } else if (event.estado === 'En progreso') {
+      backgroundColor = '#4682b4'; // Azul para en progreso
+      borderColor = '#3a6d99';
+    } else if (event.estado === 'Completado') {
+      backgroundColor = '#32cd32'; // Verde para completados
+      borderColor = '#2db82d';
+    } else if (event.estado === 'Cancelado') {
+      backgroundColor = '#ff4500'; // Rojo para cancelados
+      borderColor = '#e03e00';
     }
-    return calendarsData[selectedCalendar] || [];
+    
+    return {
+      style: {
+        backgroundColor,
+        borderRadius: '4px',
+        border: `1px solid ${borderColor}`,
+        color: '#fff',
+        display: 'block',
+        fontWeight: 'bold'
+      }
+    };
   };
 
-  // Filtra los eventos para una fecha específica
-  const getEventsForDate = (date) => {
-    const events = getCurrentCalendarEvents();
-    // Convertimos a toDateString() para comparar sin horas
-    return events.filter(
-      (event) => new Date(event.date).toDateString() === date.toDateString()
-    );
+  const handleSelectEvent = (event) => {
+    setSelectedEvent(event);
   };
 
-  // Se llama al dar clic en un día del calendario
-  const handleDayClick = (date) => {
-    setSelectedDate(date);
-    setIsModalOpen(true);
-  };
-
-  // Cerrar el modal
   const closeModal = () => {
-    setIsModalOpen(false);
+    setSelectedEvent(null);
   };
-
-  // Asigna clases de estilo a cada “tile”
-  const tileClassName = ({ date, view }) => {
-    if (view === "month") {
-      const eventsThisDay = getEventsForDate(date);
-      if (eventsThisDay.length > 0) {
-        // Tomamos el área del primer evento
-        // Para CSS, usamos minusculas
-        const areaClass = eventsThisDay[0].area.toLowerCase();
-        return `highlight-${areaClass}`;
-      }
-    }
-    return null;
-  };
-
-  // Eventos de la fecha seleccionada (para mostrarlos en el modal)
-  const eventsOfSelectedDate = selectedDate
-    ? getEventsForDate(selectedDate)
-    : [];
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
-      {/* Selector de calendario */}
-      <div style={{ marginBottom: "1rem" }}>
-        <label style={{ marginRight: "0.5rem", fontWeight: "bold" }}>
-          Seleccione Calendario:
-        </label>
-        <select
-          value={selectedCalendar}
-          onChange={(e) => setSelectedCalendar(e.target.value)}
-          style={{
-            padding: "0.4rem",
-            borderRadius: "4px",
-            border: "1px solid #ccc"
-          }}
-        >
-          <option value="informatica">Informática</option>
-          <option value="biomedica">Biomédica</option>
-          <option value="general">General</option>
-        </select>
+    <div className="calendar-container">
+      <h2>Calendario de Mantenimientos</h2>
+      
+      <div className="calendar-legend">
+        <div className="legend-item">
+          <span className="legend-color" style={{backgroundColor: '#ffd700'}}></span>
+          <span>Pendiente</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{backgroundColor: '#4682b4'}}></span>
+          <span>En progreso</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{backgroundColor: '#32cd32'}}></span>
+          <span>Completado</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color" style={{backgroundColor: '#ff4500'}}></span>
+          <span>Cancelado</span>
+        </div>
       </div>
 
-      {/* Calendario principal (más grande, con estilos) */}
-      <Calendar
-        onClickDay={handleDayClick}
-        tileClassName={tileClassName}
-      />
+      <div style={{ height: '700px', marginTop: '20px' }}>
+        <Calendar
+          localizer={localizer}
+          events={eventos}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: '100%' }}
+          onSelectEvent={handleSelectEvent}
+          eventPropGetter={eventStyleGetter}
+          messages={{
+            today: 'Hoy',
+            previous: 'Anterior',
+            next: 'Siguiente',
+            month: 'Mes',
+            week: 'Semana',
+            day: 'Día',
+            agenda: 'Agenda',
+            date: 'Fecha',
+            time: 'Hora',
+            event: 'Evento',
+            noEventsInRange: 'No hay trabajos en este rango.'
+          }}
+        />
+      </div>
 
-      {/* Modal personalizado para mostrar datos de la fecha seleccionada */}
-      {isModalOpen && (
+      {selectedEvent && (
         <div className="modal-backdrop" onClick={closeModal}>
-          <div
-            className="modal-content"
-            // Evita que al dar clic dentro del modal se cierre
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button className="modal-close-button" onClick={closeModal}>
-              ✕
-            </button>
-            {/* Encabezado del modal */}
-            <h2>
-              Trabajos para el{" "}
-              {selectedDate?.toLocaleDateString("es-ES", {
-                year: "numeric",
-                month: "long",
-                day: "numeric"
-              })}
-            </h2>
-            <hr style={{ margin: "0.5rem 0 1rem 0" }} />
-            {/* Contenido del modal */}
-            {eventsOfSelectedDate.length === 0 ? (
-              <p>No hay trabajos programados.</p>
-            ) : (
-              <ul style={{ textAlign: "left" }}>
-                {eventsOfSelectedDate.map((event, index) => (
-                  <li key={index} style={{ marginBottom: "0.5rem" }}>
-                    <strong>{event.area}</strong>: {event.desc} <br />
-                    <em>Responsable: {event.resp}</em>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={closeModal}>✕</button>
+            <h2>{selectedEvent.title}</h2>
+            <div className="event-details">
+              <p><strong>Estado:</strong> {selectedEvent.estado}</p>
+              <p><strong>Inicio:</strong> {moment(selectedEvent.start).format('LLL')}</p>
+              <p><strong>Fin:</strong> {moment(selectedEvent.end).format('LLL')}</p>
+              <p><strong>Descripción:</strong> {selectedEvent.descripcion}</p>
+            </div>
           </div>
         </div>
       )}

@@ -4,6 +4,8 @@ import LoginUser from "../pages/login/LoginUser";
 import { lazy } from "react";
 import  Sidebar  from "../components/sidebar/SideBar";
 import ProfileUser from "../pages/users/ProfileUser";
+import ResetPassword from "../pages/login/ResetPassword.jsx";
+import NewPassword from "../pages/login/NewPassword.jsx";
 
 
 const Home = lazy(() => import("../pages/home/Home"));
@@ -18,7 +20,7 @@ const TrabajoForm = lazy(() => import("../pages/users/TrabajoForm"));
 const TrabajoManagement = lazy(() => import("../pages/users/TrabajoList"));
 const TrabajoAddUsers = lazy(() => import("../pages/users/TrabajoAddUsers")); 
 const TrabajoUserList = lazy(() => import("../pages/users/TrabajoUserList"));
-const Taskboard = lazy(() => import("../pages/trabajos/Taskboardtask.jsx"));
+const Taskboard = lazy(() => import("../pages/trabajos/TaskBoardtask.jsx"));
 const Cronograma = lazy(() => import("../pages/cronograma/Cronograma"));
 const CalendarioMantenimientos = lazy(() => import("../pages/cronograma/Calendario"));
 
@@ -27,6 +29,8 @@ const AppRoutes = () => (
   <Routes>
     {/* Rutas públicas */}
     <Route path="/" element={<LoginUser />} />
+    <Route path="/reset" element={<ResetPassword />} />
+    <Route path="/reset-password/:token" element={<NewPassword />} />
     
     {/* Rutas privadas */}
     <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
@@ -38,6 +42,7 @@ const AppRoutes = () => (
     <Route path="/editUser/:id" element={<PrivateRoute><UserForm /></PrivateRoute>} />
     <Route path="/equipos/register" element={<PrivateRoute><EquipoForm /></PrivateRoute>} />
     <Route path="/equipos" element={<PrivateRoute><EquipoList /></PrivateRoute>} />
+    <Route path="/equipos/:id" element={<PrivateRoute><EquipoForm /></PrivateRoute>} />
     <Route path="/trabajos/register" element={<PrivateRoute><TrabajoForm /></PrivateRoute>} />
     <Route path="/trabajos" element={<PrivateRoute><TrabajoManagement /></PrivateRoute>} />
     <Route path="/roles" element={<PrivateRoute allowedRoles={["Administrador"]}><RolesForm /></PrivateRoute>} />

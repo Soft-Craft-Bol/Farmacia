@@ -1,0 +1,146 @@
+
+
+  /* Table.css */
+  .equipos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin: 10px;
+  }
+  
+  .equipos-table th, 
+  .equipos-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .equipos-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .equipos-table th:hover {
+    background-color: #e9ecef;
+  }
+  
+  .equipos-table th.sorted.asc::after {
+    content: ' ↑';
+  }
+  
+  .equipos-table th.sorted.desc::after {
+    content: ' ↓';
+  }
+  
+  .equipos-table tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+  }
+  
+  .equipo-foto-cell {
+    width: 80px;
+  }
+  
+  .equipo-foto {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .placeholder {
+    width: 60px;
+    height: 60px;
+    background-color: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: #999;
+  }
+  
+  .table-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+  }
+  
+  .edit-btn {
+    color: #007bff;
+  }
+  
+  .delete-btn {
+    color: #dc3545;
+  }
+  
+  .add-equipo-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .add-equipo-btn:hover {
+    background-color: #218838;
+  }
+  
+  .no-data {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+  }
+  
+  /* Pagination styles (similar a los que ya tenías) */
+  .pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .pagination-button {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  .pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .pagination-info {
+    margin: 0 10px;
+  }
+  
+  .rows-per-page {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .rows-per-page select {
+    padding: 5px;
+  }

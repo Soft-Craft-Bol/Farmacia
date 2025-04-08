@@ -1,95 +1,138 @@
 const bcrypt = require('bcrypt');
+require('dotenv').config();
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinaryConf');
-require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 
-// Configurar el almacenamiento de multer para Cloudinary
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-      folder: 'usuariosFarmacia', 
-      allowed_formats: ["jpg", "png", "avif", "webp"], 
-      public_id: (req, file) => `${Date.now()}-${file.originalname}`, 
+// Configuración de Multer para almacenamiento local
+const uploadPath = path.join(__dirname, '../uploads/profile_images');
+if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadPath);
     },
-});
-  
-const upload = multer({ storage });
-
-// Registrar nuevo usuario
-exports.register = async (req, res) => {
-    try {
-        const { nombre, apellido, usuario, email, password, ci, profesion, areaId, role, foto } = req.body;
-        
-        let fotoUrl = foto || null; // Si se envía la URL en JSON, se usa directamente.
-
-        // Si el usuario subió un archivo, subirlo a Cloudinary
-        if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path);
-            fotoUrl = result.secure_url; // Ahora tenemos la URL real de Cloudinary
-        }
-
-        // Si no hay URL ni archivo, error
-        if (!fotoUrl) {
-            return res.status(400).json({ error: "La foto es requerida" });
-        }
-
-        // Hashear contraseña
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Verificar si el rol existe
-        const roleExists = await prisma.role.findUnique({
-            where: { id: Number(role) }
-        });
-
-        if (!roleExists) {
-            return res.status(400).json({ error: 'El rol no existe' });
-        }
-
-        // Crear usuario en la base de datos
-        const user = await prisma.user.create({
-            data: {
-                nombre,
-                apellido,
-                usuario,
-                email,
-                password: hashedPassword,
-                ci,
-                profesion,
-                foto: fotoUrl, // Ahora guarda la URL correctamente
-                areaId: Number(areaId),
-                roles: {
-                    create: [{ role: { connect: { id: Number(role) } } }]
-                }
-            },
-            include: {
-                roles: { include: { role: true } }
-            }
-        });
-
-        res.status(201).json(user);
-    } catch (error) {
-        console.error("🔥 ERROR en register():", error);
-        res.status(400).json({ error: error.message });
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
     }
-};
+});
 
+// Configuración del transporter para nodemailer
+const transporter = nodemailer.createTransport({
+    service: process.env.EMAIL_SERVICE,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
+
+const upload = multer({ 
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten imágenes'), false);
+        }
+    },
+    limits: {
+        fileSize: 5 * 1024 * 1024 // Límite de 5MB
+    }
+});
+
+exports.register = [
+    upload.single('foto'), 
+    async (req, res) => {
+        console.log("Registro de usuario:", req.body);
+        try {
+            const { nombre, apellido, usuario, email, password, ci, profesion, roles, areas } = req.body;
+
+            if (!req.file) {
+                return res.status(400).json({ error: "La foto de perfil es requerida" });
+            }
+            const fotoUrl = `/uploads/images/${req.file.filename}`;
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Asegura que roles y areas estén como arrays de números
+            const parsedRoles = Array.isArray(roles) ? roles.map(Number) : JSON.parse(roles);
+            const parsedAreas = Array.isArray(areas) ? areas.map(Number) : JSON.parse(areas);
+
+            // Validación de existencia
+            const foundRoles = await prisma.role.findMany({
+                where: { id: { in: parsedRoles } }
+            });
+
+            const foundAreas = await prisma.area.findMany({
+                where: { id: { in: parsedAreas } }
+            });
+
+            if (foundRoles.length !== parsedRoles.length) {
+                fs.unlinkSync(req.file.path);
+                return res.status(400).json({ error: 'Uno o más roles no existen' });
+            }
+
+            if (foundAreas.length !== parsedAreas.length) {
+                fs.unlinkSync(req.file.path);
+                return res.status(400).json({ error: 'Una o más áreas no existen' });
+            }
+
+            const user = await prisma.user.create({
+                data: {
+                    nombre,
+                    apellido,
+                    usuario,
+                    email,
+                    password: hashedPassword,
+                    ci,
+                    profesion,
+                    foto: fotoUrl,
+                    roles: {
+                        create: parsedRoles.map(roleId => ({
+                            role: { connect: { id: roleId } }
+                        }))
+                    },
+                    areas: {
+                        create: parsedAreas.map(areaId => ({
+                            area: { connect: { id: areaId } }
+                        }))
+                    }
+                },
+                include: {
+                    roles: { include: { role: true } },
+                    areas: { include: { area: true } }
+                }
+            });
+
+            res.status(201).json(user);
+        } catch (error) {
+            if (req.file) fs.unlinkSync(req.file.path);
+            console.error("Error en registro:", error);
+            res.status(400).json({ error: error.message });
+        }
+    }
+];
 
 
 // Obtener perfil de usuario
 exports.getProfile = async (req, res) => {
     try {
-        const userId = req.user.id;
-  
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            include: {
-                area: true,
-                roles: { include: { role: true } },
-            },
-        });
+      const userId = parseInt(req.user.id);
+      if (isNaN(userId)) {
+          return res.status(400).json({ error: 'ID de usuario inválido' });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+            roles: { include: { role: true } },
+            areas: { include: { area: true } }
+        }
+    });
   
         if (!user) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -104,8 +147,8 @@ exports.getProfile = async (req, res) => {
             ci: user.ci,
             profesion: user.profesion,
             foto: user.foto,
-            nombre: user.area ? user.area.nombre : null,
             roles: user.roles.map(r => r.role.nombre),
+            areas: user.areas.map(a => a.area.nombre),
         };
   
         return res.json(response);
@@ -157,4 +200,98 @@ exports.login = async (req, res) => {
 exports.getRoles = async (req, res) => {
     const roles = await prisma.role.findMany();
     res.json(roles);
+};
+
+
+
+
+
+// Solicitar recuperación de contraseña
+exports.requestPasswordReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Buscar usuario por email
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Generar token único
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hora de expiración
+
+    // Actualizar usuario con el token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken,
+        resetTokenExpiry
+      }
+    });
+
+    // Crear enlace de recuperación
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    // Configurar correo electrónico
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: user.email,
+      subject: 'Recuperación de contraseña',
+      html: `
+        <p>Hola ${user.nombre},</p>
+        <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+        <p>Por favor, haz clic en el siguiente enlace para continuar:</p>
+        <a href="${resetUrl}">${resetUrl}</a>
+        <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+        <p>El enlace expirará en 1 hora.</p>
+      `
+    };
+
+    // Enviar correo electrónico
+    await transporter.sendMail(mailOptions);
+
+    res.json({ success: true, message: 'Se ha enviado un enlace de recuperación a tu correo electrónico' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al procesar la solicitud' });
+  }
+};
+
+// Restablecer contraseña
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Buscar usuario por token y verificar expiración
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: { gt: new Date() }
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Token inválido o expirado' });
+    }
+
+    // Hashear nueva contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Actualizar contraseña y limpiar token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null
+      }
+    });
+
+    res.json({ success: true, message: 'Contraseña actualizada correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar la contraseña' });
+  }
 };

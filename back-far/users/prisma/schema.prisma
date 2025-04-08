@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id        String  @id @default(uuid()) 
+  id        Int     @id @default(autoincrement())
   nombre    String
   apellido  String
   usuario   String  @unique
@@ -24,14 +24,14 @@ model User {
   item      String?
   profesion String?
   foto      String?
-  areaId    Int?
-  area      Area?   @relation(fields: [areaId], references: [id])
   roles     UserRole[]
   equipos   UserTeam[]
+  areas     UserArea[] // <- relación nueva
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  resetToken      String?
+  resetTokenExpiry DateTime?
 }
-
 model Role {
   id          Int        @id @default(autoincrement())
   nombre      String     @unique
@@ -46,18 +46,17 @@ model Permission {
   nombre    String     @unique
   roles     RolePermission[]
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  updatedAt DateTime?   @updatedAt
 }
 
 model UserRole {
   id        Int     @id @default(autoincrement())
-  userId    String
+  userId    Int    
   roleId    Int
   user      User    @relation(fields: [userId], references: [id])
   role      Role    @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
-
-  @@unique([userId, roleId]) // Asegura que un usuario no tenga roles duplicados
+  @@unique([userId, roleId])
 }
 
 model RolePermission {
@@ -68,14 +67,25 @@ model RolePermission {
   permission  Permission @relation(fields: [permissionId], references: [id])
   createdAt   DateTime @default(now())
 
-  @@unique([roleId, permissionId]) // Evita duplicar permisos en un rol
+  @@unique([roleId, permissionId]) 
 }
 
 model Area {
   id        Int       @id @default(autoincrement())
   nombre    String    @unique
-  usuarios  User[]
+  usuarios  UserArea[] // <- relación nueva
   createdAt DateTime  @default(now())
+}
+
+model UserArea {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  areaId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  area      Area    @relation(fields: [areaId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, areaId])
 }
 
 model Team {
@@ -88,13 +98,12 @@ model Team {
 
 model UserTeam {
   id        Int    @id @default(autoincrement())
-  userId    String
+  userId    Int    // Cambiado de String a Int
   teamId    Int
   user      User  @relation(fields: [userId], references: [id])
   team      Team  @relation(fields: [teamId], references: [id])
   createdAt DateTime @default(now())
-
-  @@unique([userId, teamId]) // Evita que un usuario esté duplicado en un equipo
+  @@unique([userId, teamId])
 }
 
 

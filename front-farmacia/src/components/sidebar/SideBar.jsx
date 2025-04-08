@@ -97,7 +97,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             )} */}
             <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
             <SidebarLink to="/trabajos/calendario" icon={<FaCalendarAlt />} text="Calendario" />
-            <SidebarLink to="/trabajos/taskboard" icon={<BsKanban  />} text="Tablero Kanban" />
+            <SidebarLink to="/trabajos/taskboard" icon={<BsKanban  />} text="Tablero de seguimiento" />
             <SidebarLink to="/teams/register" icon={<RiTeamFill />} text="Registrar Equipo" />
             <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Crear Trabajo" />
             <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Listar Trabajos" />

@@ -3,7 +3,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import InputText from '../../components/inputs/InputText';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getRoles, addUser, updateUser, getUserById } from '../../service/api';
+import { getRoles, addUser, updateUser, getUserById, getAreas } from '../../service/api';
 import { FaCamera } from '../../hooks/icons';
 import { Toaster, toast } from 'sonner';
 import { useTheme } from '../../context/ThemeContext';
@@ -12,6 +12,7 @@ import Select from '../../components/select/Select';
 import { ButtonPrimary } from '../../components/buttons/ButtonPrimary';
 import { FaCirclePlus } from "react-icons/fa6";
 import LinkButton from '../../components/buttons/LinkButton';
+import { IoCloseOutline } from "react-icons/io5";
 
 function UserForm() {
   const navigate = useNavigate();
@@ -19,8 +20,11 @@ function UserForm() {
   const { theme } = useTheme();
 
   const [roles, setRoles] = useState([]);
+  const [areas, setAreas] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [selectedRoles, setSelectedRoles] = useState([]);
+  const [selectedAreas, setSelectedAreas] = useState([]);
 
   const [initialValues, setInitialValues] = useState({
     nombre: '',
@@ -32,8 +36,6 @@ function UserForm() {
     ci: '',
     profesion: '',
     foto: null,
-    areaId: 1, // Asumiendo que el área por defecto es 1
-    role: '', // Cambiado para aceptar un solo rol
   });
 
   const notify = useCallback((message, type = 'success') => {
@@ -47,19 +49,16 @@ function UserForm() {
     email: Yup.string().email('Correo inválido').required('Requerido'),
     password: Yup.string()
       .min(6, 'Mínimo 6 caracteres')
-      .when('editingUser', {
-        is: false,
-        then: Yup.string().required('Requerido'),
+      .when('editingUser', (editingUser, schema) => {
+        return editingUser ? schema : schema.required('Requerido');
       }),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Las contraseñas no coinciden')
-      .when('editingUser', {
-        is: false,
-        then: Yup.string().required('Requerido'),
+      .when('editingUser', (editingUser, schema) => {
+        return editingUser ? schema : schema.required('Requerido');
       }),
     ci: Yup.string().required('Requerido'),
     profesion: Yup.string().required('Requerido'),
-    role: Yup.string().required('Requerido'), // Cambiado para ser un solo rol
     foto: Yup.mixed().nullable(),
   }), []);
 
@@ -76,55 +75,99 @@ function UserForm() {
       }
     };
 
-    const fetchUser = async () => {
+    const fetchAreas = async () => {
       try {
-        const response = await getUserById(id);
-        setEditingUser(response.data);
-        setInitialValues({
-          nombre: response.data.nombre || '',
-          apellido: response.data.apellido || '',
-          usuario: response.data.usuario || '',
-          email: response.data.email || '',
-          password: '',
-          confirmPassword: '',
-          ci: response.data.ci || '',
-          profesion: response.data.profesion || '',
-          foto: response.data.foto || null,
-          areaId: response.data.areaId || 1,
-          role: response.data.roleIds[0] || '', // Asumiendo que es un solo rol
-        });
-
-        if (response.data.foto) setPhotoPreview(response.data.foto);
+        const response = await getAreas();
+        setAreas(response.data.map((area) => ({
+          value: area.id,
+          label: area.nombre,
+        })));
       } catch (error) {
-        notify('Error al obtener los datos del usuario.', 'error');
+        notify('Error al obtener las áreas.', 'error');
       }
     };
 
+    const fetchUser = async () => {
+      try {
+        const response = await getUserById(id);
+        console.log(response.data);
+        const userData = response.data;
+        
+        setEditingUser(userData);
+        setInitialValues({
+          nombre: userData.nombre || '',
+          apellido: userData.apellido || '',
+          usuario: userData.usuario || '',
+          email: userData.email || '',
+          password: '',
+          confirmPassword: '',
+          ci: userData.ci || '',
+          profesion: userData.profesion || '',
+          foto: userData.foto || null,
+        });
+  
+        // Set selected roles from user data
+        if (userData.roles) {
+          setSelectedRoles(userData.roles.map(role => role.id)); // Use role.id to set selected roles
+        }
+  
+        // Set selected areas from user data
+        if (userData.areas) {
+          setSelectedAreas(userData.areas.map(area => area.id)); // Use area.id to set selected areas
+        }
+  
+        if (userData.foto) {
+          const baseUrl = 'http://localhost:5000/'; // or your production domain
+          const imageUrl = userData.foto.startsWith('http') ? userData.foto : `${baseUrl}${userData.foto}`;
+          setPhotoPreview(imageUrl);
+        }
+        
+      } catch (error) {
+        notify('Error al obtener los datos del usuario.', 'error');
+        console.error("Error al obtener usuario:", error);
+      }
+    };
+  
+
     fetchRoles();
+    fetchAreas();
     if (id) fetchUser();
   }, [id, notify]);
 
   const handleSubmit = useCallback(async (values, { resetForm }) => {
     const formData = new FormData();
     
-    Object.keys(values).forEach((key) => {
-      if (values[key] !== null) formData.append(key, values[key]);
+    // Agregar campos básicos
+    Object.keys(values).forEach(key => {
+        if (key !== 'foto' && values[key] !== null && values[key] !== undefined) {
+            formData.append(key, values[key]);
+        }
     });
-  
-    try {
-      if (editingUser) {
-        await updateUser(editingUser.id, formData);  
-        notify('Usuario actualizado exitosamente.');
-      } else {
-        await addUser(formData);  
-        notify('Usuario agregado exitosamente.');
-      }
-      resetForm();
-      navigate('/userManagement');
-    } catch (error) {
-      notify('Error al procesar la solicitud.', 'error');
+
+    // Agregar roles y áreas
+    selectedRoles.forEach(roleId => formData.append('roles[]', roleId));
+    selectedAreas.forEach(areaId => formData.append('areas[]', areaId));
+
+    // Agregar foto si es un archivo nuevo
+    if (values.foto instanceof File) {
+        formData.append('foto', values.foto);
     }
-  }, [editingUser, navigate, notify]);
+
+    try {
+        if (editingUser) {
+            await updateUser(editingUser.id, formData);  
+            notify('Usuario actualizado exitosamente.');
+        } else {
+            await addUser(formData);  
+            notify('Usuario agregado exitosamente.');
+        }
+        resetForm();
+        navigate('/userManagement');
+    } catch (error) {
+        console.error("Error al procesar:", error);
+        notify(error.response?.data?.message || 'Error al procesar la solicitud.', 'error');
+    }
+}, [editingUser, navigate, notify, selectedRoles, selectedAreas]);
 
   const handlePhotoChange = (event, setFieldValue) => {
     const file = event.currentTarget.files[0];
@@ -140,14 +183,33 @@ function UserForm() {
       setPhotoPreview(null);
     }
   };
-  const [camposExtras, setCamposExtras] = useState([]); // Lista de información adicional
+
+  const toggleRole = (roleId) => {
+    setSelectedRoles(prev => 
+      prev.includes(roleId) 
+        ? prev.filter(id => id !== roleId) 
+        : [...prev, roleId]
+    );
+  };
+
+  const toggleArea = (areaId) => {
+    setSelectedAreas(prev => 
+      prev.includes(areaId) 
+        ? prev.filter(id => id !== areaId) 
+        : [...prev, areaId]
+    );
+  };
+
+  const [camposExtras, setCamposExtras] = useState([]);
   const [nuevoCampo, setNuevoCampo] = useState("");
+
   const agregarCampo = () => {
     if (nuevoCampo.trim() !== "") {
       setCamposExtras([...camposExtras, nuevoCampo]);
-      setNuevoCampo(""); // Limpiar el input después de agregar
+      setNuevoCampo("");
     }
   };
+
   return (
     <div className={`user-form-container ${theme}`}>
       <Toaster duration={2000} position="bottom-right" />
@@ -186,14 +248,39 @@ function UserForm() {
                   <InputText label="Apellido" name="apellido" required />
                   <InputText label="Usuario" name="usuario" required />
                   <InputText label="Cédula de Identidad" name="ci" required />
-                  <Select label="Roles" name="role" required>  
-                    <option value="">Seleccione un rol</option>
-                    {roles.map((rol) => (
-                      <option key={rol.value} value={rol.value}>
-                        {rol.label}
-                      </option>
-                    ))}
-                  </Select>
+                  
+                  {/* Selector de Roles */}
+                  <div className="multi-select-container">
+                    <label>Roles:</label>
+                    <select onChange={(e) => toggleRole(parseInt(e.target.value))}>
+                      <option value="">Seleccione un rol</option>
+                      {roles.map((rol) => (
+                        <option key={rol.value} value={rol.value}>
+                          {rol.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="selected-items-container">
+                      <h4>Roles seleccionados:</h4>
+                      {selectedRoles.length === 0 ? (
+                        <p>No has seleccionado roles aún.</p>
+                      ) : (
+                        selectedRoles.map((roleId) => {
+                          const role = roles.find(r => r.value === roleId);
+                          return (
+                            <span 
+                              key={roleId} 
+                              className="selected-item"
+                              onClick={() => toggleRole(roleId)}
+                            >
+                              {role?.label || roleId}
+                              <IoCloseOutline size={16} color="red" />
+                            </span>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className="form-column">
                   <InputText
@@ -210,7 +297,43 @@ function UserForm() {
                   />
                   <InputText label="Correo Electrónico" name="email" required />
                   <InputText label="Profesión" name="profesion" required />
-                  <LinkButton to="/roles" variant="secondary">Agregar Roles</LinkButton>
+                  
+                  {/* Selector de Áreas */}
+                  <div className="multi-select-container">
+                    <label>Áreas:</label>
+                    <select onChange={(e) => toggleArea(parseInt(e.target.value))}>
+                      <option value="">Seleccione un área</option>
+                      {areas.map((area) => (
+                        <option key={area.value} value={area.value}>
+                          {area.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="selected-items-container">
+                      <h4>Áreas seleccionadas:</h4>
+                      {selectedAreas.length === 0 ? (
+                        <p>No has seleccionado áreas aún.</p>
+                      ) : (
+                        selectedAreas.map((areaId) => {
+                          const area = areas.find(a => a.value === areaId);
+                          return (
+                            <span 
+                              key={areaId} 
+                              className="selected-item"
+                              onClick={() => toggleArea(areaId)}
+                            >
+                              {area?.label || areaId}
+                              <IoCloseOutline size={16} color="red" />
+                            </span>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="buttons-container">
+                    <LinkButton to="/roles" variant="secondary">Gestionar Roles</LinkButton>
+                  </div>
                 </div>
               </div>
               <div className="agregar-info-container">
@@ -221,11 +344,11 @@ function UserForm() {
                   placeholder="Escribe información adicional..."
                   className="input-info"
                 />
-                <button className="open-modal-btn" onClick={agregarCampo}>
-                  <FaCirclePlus className="icon-plus" /> </button>
+                <button type="button" className="open-modal-btn" onClick={agregarCampo}>
+                  <FaCirclePlus className="icon-plus" />
+                </button>
               </div>
 
-              {/* Lista de Información Agregada */}
               <ul className="component-list">
                 {camposExtras.map((info, index) => (
                   <li key={index} className="component-item">

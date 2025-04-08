@@ -1,15 +1,15 @@
 version: '3.8'
 services:
-  auth-service:
-    build: ./auth-service
+  users:
+    build: ./users
     ports:
       - "4000:4000"
-  products-service:
-    build: ./products-service
+  trabajos:
+    build: ./trabajos
     ports:
       - "5000:5000"
-  orders-service:
-    build: ./orders-service
+  equipos:
+    build: ./equipos
     ports:
       - "6000:6000"
   api-gateway:
@@ -17,6 +17,6 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - auth-service
-      - products-service
-      - orders-service
+      - users
+      - trabajos
+      - equipos
