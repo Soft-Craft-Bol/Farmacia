@@ -35,11 +35,16 @@ apiEquipos.interceptors.request.use(authInterceptor, (error) => Promise.reject(e
 
 export { apiUsers, apiEquipos };
 
-
+//Login
 export const loginUser = (data) => apiUsers.post('/auth/login', data);
+export const requestPasswordReset = (email) => apiUsers.post('/auth/password/forgot', { email });
+export const resetPassword = (token, newPassword) => apiUsers.post(`/auth/password/reset/${token}`, { password: newPassword });
+
+//Users
 export const getUsers = () => apiUsers.get('/users');
 export const deleteUser = (id) => apiUsers.delete(`/users/${id}`);
 export const getRoles = () => apiUsers.get('/auth/roles');
+export const getUserNameById = (id) => apiUsers.get(`/users/name/${id}`);
 
 
 export const addUser = (data) => apiUsers.post('/auth/register', data);
@@ -58,6 +63,11 @@ export const getUserProfile = async () => {
   }
 };
 
+//areas
+export const getAreas = () => apiUsers.get('/area');
+export const getAreaById = (id) => apiUsers.get(`/area/user/${id}`);
+
+//equipos
 export const getEquipos = () => apiEquipos.get('/equipos');
 export const getEquipoById = (id) => apiEquipos.get(`/equipos/${id}`);
 export const createEquipo = (data) => apiEquipos.post('/equipos', data);
@@ -84,3 +94,11 @@ export const getTrabajoById = (id) => apiTrabajos.get(`/trabajos/${id}`);
 export const addUsersToTrabajo = (trabajoId, users) => apiTrabajos.post(`/trabajos/${trabajoId}/equipos`, { users });
 export const removeUserFromTrabajo = (trabajoId, userId) => apiTrabajos.delete(`/trabajos/${trabajoId}/equipos/${userId}`);
 export const UpdateEstado  = (trabajoId, estado) => apiTrabajos.patch(`/trabajos/${trabajoId}/estado`, { estado });
+
+export const updateEstadoTrabajo = (trabajoId, estado) => 
+  apiTrabajos.patch(`/trabajos/${trabajoId}/estado`, { estado });
+
+export const getTrabajosByEstado = (estado) => 
+  apiTrabajos.get(`/trabajos?estado=${estado}`);
+
+

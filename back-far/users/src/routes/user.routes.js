@@ -1,9 +1,10 @@
 const express = require('express');
-const { getUsers, getUserById, updateUser, deleteUser, getUsersByRole } = require('../controllers/user.controller');
+const { getUsers, getUserById, updateUser, deleteUser, getUsersByRole, getUserNameById  } = require('../controllers/user.controller');
 const router = express.Router();
 router.get('/', getUsers);
 router.get('/:id', getUserById);
 router.put('/:id', updateUser);
 router.delete('/:id', deleteUser);
 router.get('/role/:roleId', getUsersByRole);
+router.get('/name/:id', getUserNameById); 
 module.exports = router;

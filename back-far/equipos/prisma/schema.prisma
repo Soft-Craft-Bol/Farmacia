@@ -13,6 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model Equipo {
   id               Int       @id @default(autoincrement())
   etiquetaActivo   String    @unique
@@ -24,11 +25,20 @@ model Equipo {
   fechaCompra      DateTime
   proveedor        String
   numeroOrden      String
-  fotoUrl          String?  
-  documentoUrl     String?
+  fotoUrl1         String?
+  fotoUrl2         String?
+  fotoUrl3         String?
+  fotoUrl4         String?
+  documentoUrl1    String?
+  documentoUrl2    String?
+  documentoUrl3    String?
+  documentoUrl4    String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  userId           Int       @default(1) 
   componentes      ComponenteEquipo[]
+  imagenes         ImagenEquipo[]
+  documentos       DocumentoEquipo[]
 }
 
 model ComponenteEquipo {
@@ -36,6 +46,26 @@ model ComponenteEquipo {
   nombre     String
   equipoId   Int
   equipo     Equipo  @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
 
+model ImagenEquipo {
+  id         Int     @id @default(autoincrement())
+  url        String
+  file       String? // Representa el archivo que se sube si no es una imagen existente
+  isExisting Boolean
+  equipoId   Int
+  equipo     Equipo  @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
+
+model DocumentoEquipo {
+  id         Int     @id @default(autoincrement())
+  name       String
+  file       String? // Representa el archivo que se sube si no es un documento existente
+  type       String
+  isExisting Boolean
+  equipoId   Int
+  equipo     Equipo  @relation(fields: [equipoId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 }

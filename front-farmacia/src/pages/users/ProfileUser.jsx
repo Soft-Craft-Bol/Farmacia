@@ -62,7 +62,7 @@ export default function UserProfile() {
           <div className="perfil-container">
             <div className="profile-image">
               <img
-                src={user?.foto ? user.foto : `https://hwchamber.co.uk/wp-content/uploads/2022/04/avatar-placeholder.gif`}
+                src={ `https://hwchamber.co.uk/wp-content/uploads/2022/04/avatar-placeholder.gif`}
                 alt="Perfil"
                 className="img-perfil"
               />

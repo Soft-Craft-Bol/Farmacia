@@ -4,16 +4,14 @@ const equipoController = require('../controllers/equipo.controller');
 
 
 router.post(
-  '/',
-//   equipoController.uploadMiddleware.single('foto'),
-  equipoController.uploadMiddleware.fields([
-    { name: 'foto', maxCount: 1 },      
-    { name: 'documento', maxCount: 1 }   
-  ]),
-  equipoController.registrarEquipo
+  '/', equipoController.uploadMiddleware, equipoController.registrarEquipo
 );
-
 router.get('/', equipoController.obtenerEquipos);
 router.delete('/:id', equipoController.eliminarEquipo);
+router.get('/:id', equipoController.obtenerEquipoPorId);
+router.put(
+  '/:id', equipoController.uploadMiddleware, equipoController.actualizarEquipo
+);
 
 module.exports = router;
+ 

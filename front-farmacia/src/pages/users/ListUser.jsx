@@ -10,6 +10,7 @@ import "./ListUser.css";
 import { ButtonPrimary } from "../../components/buttons/ButtonPrimary";
 
 const Modal = lazy(() => import("../../components/modal/Modal"));
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -89,9 +90,14 @@ const UserManagement = () => {
         render: (row) => (
           <div className="user-photo">
             <img
-              src={row.photo || "ruta/de/foto/por/defecto.jpg"}
-              alt={`${row.name} ${row.last_name}`}
-              style={{ width: "50px", height: "50px", borderRadius: "50%" }}
+              src={`http://localhost:5000${row.foto}`}
+              alt={`${row.nombre} ${row.apellido}`}
+              style={{ 
+                width: "50px", 
+                height: "50px", 
+                borderRadius: "50%",
+                objectFit: "cover"
+              }}
             />
           </div>
         ),

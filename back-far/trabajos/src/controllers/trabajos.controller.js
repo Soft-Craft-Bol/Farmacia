@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const ESTADOS_VALIDOS = ['Pendiente', 'En Progreso', 'Finalizado'];
+const ESTADOS_VALIDOS = ['Pendiente', 'En Progreso', 'Finalizado', 'Cancelado'];
 
 
 exports.createTrabajo = async (req, res) => {
@@ -170,18 +170,30 @@ exports.removeUserFromTrabajo = async (req, res) => {
   }
 };
 
-/**
- * Actualizar solo el estado de un trabajo
- */
+
 exports.updateEstadoTrabajo = async (req, res) => {
   const { trabajoId } = req.params;
   const { estado } = req.body;
 
-  if (estado && !ESTADOS_VALIDOS.includes(estado)) {
-    return res.status(400).json({ error: 'Estado inválido' });
+  // Validar estado
+  if (!ESTADOS_VALIDOS.includes(estado)) {
+    return res.status(400).json({ 
+      error: 'Estado inválido',
+      estadosValidos: ESTADOS_VALIDOS
+    });
   }
 
   try {
+    // Verificar que el trabajo existe
+    const trabajoExistente = await prisma.trabajo.findUnique({
+      where: { id: Number(trabajoId) }
+    });
+
+    if (!trabajoExistente) {
+      return res.status(404).json({ error: 'Trabajo no encontrado' });
+    }
+
+    // Actualizar solo el estado
     const trabajoActualizado = await prisma.trabajo.update({
       where: { id: Number(trabajoId) },
       data: { estado },
@@ -192,8 +204,10 @@ exports.updateEstadoTrabajo = async (req, res) => {
       data: trabajoActualizado,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Error al actualizar el estado del trabajo' });
+    console.error("Error al actualizar estado:", error);
+    return res.status(500).json({ 
+      error: 'Error al actualizar el estado del trabajo',
+      details: error.message 
+    });
   }
 };
-
