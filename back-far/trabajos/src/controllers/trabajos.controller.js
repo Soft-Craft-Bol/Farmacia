@@ -1,26 +1,49 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const fs = require('fs');
+const cloudinary = require('../config/cloudinary'); // si usas Cloudinary
 
-const ESTADOS_VALIDOS = ['Pendiente', 'En Progreso', 'Finalizado', 'Cancelado'];
-
+const ESTADOS_VALIDOS = [
+  'Pendiente',
+  'En Progreso',
+  'Finalizado',
+  'Cancelado',
+  'Aceptado',
+  'Rechazado',
+];
 
 exports.createTrabajo = async (req, res) => {
+  console.log("Creando trabajo...");
   try {
-    const { nombre, descripcion, fechaInicio, fechaFin, encargadoId, estado, area } = req.body; // Agregar area
+    const { nombre, descripcion, fechaInicio, fechaFin, encargadoId, estado, area } = req.body;
 
     if (estado && !ESTADOS_VALIDOS.includes(estado)) {
       return res.status(400).json({ error: 'Estado inválido' });
+    }
+
+    let imagenUrl = null;
+
+    if (req.file) {
+      // Si usas Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'trabajos',
+      });
+      imagenUrl = result.secure_url;
+
+      // Elimina el archivo temporal
+      fs.unlinkSync(req.file.path);
     }
 
     const nuevoTrabajo = await prisma.trabajo.create({
       data: {
         nombre,
         descripcion,
-        area, // Agregar area aquí
+        area,
         fechaInicio: new Date(fechaInicio),
         fechaFin: fechaFin ? new Date(fechaFin) : null,
         encargadoId,
         estado: estado || 'Pendiente',
+        imagenes: imagenUrl, // Aquí guardamos la URL de la imagen
       },
     });
 
@@ -29,7 +52,7 @@ exports.createTrabajo = async (req, res) => {
       data: nuevoTrabajo,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error al crear el trabajo:", error);
     return res.status(500).json({ error: 'Error al crear el trabajo' });
   }
 };

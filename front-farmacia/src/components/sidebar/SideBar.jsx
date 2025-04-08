@@ -98,6 +98,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <>
                 <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
                 <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
+                <SidebarLink to="/trabajos/taskboard" icon={<BsKanban />} text="Tablero de seguimiento" />
+                <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Solicitar Trabajo" />
+                <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Trabajos" />
               </>
             )}
             {isInformatico && (
@@ -107,7 +110,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               </>
             )}
             {isDoctor && (
+              <>
               <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Listar Trabajos" />
+              <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Listar Trabajos" />
+              <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
+              </>
             )}
             {isBiomedico && (
               <>

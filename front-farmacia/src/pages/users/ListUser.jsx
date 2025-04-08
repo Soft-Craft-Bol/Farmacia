@@ -19,6 +19,13 @@ const UserManagement = () => {
   const [filterText, setFilterText] = useState("");
   const [userToDelete, setUserToDelete] = useState(null);
   const [filterValues, setFilterValues] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
+const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+const handleRowClick = (user) => {
+  setSelectedUser(user);
+  setDetailsModalOpen(true);
+};
+
   const currentUser = useMemo(() => getUser(), []);
 
   useEffect(() => {
@@ -90,7 +97,7 @@ const UserManagement = () => {
         render: (row) => (
           <div className="user-photo">
             <img
-              src={`http://localhost:5000${row.foto}`}
+              src={row.foto}
               alt={`${row.nombre} ${row.apellido}`}
               style={{ 
                 width: "50px", 
@@ -136,7 +143,13 @@ const UserManagement = () => {
          <LinkButton to={`/registerUser`}>Agregar Usuario</LinkButton>
       </div>
 
-      <Table columns={columns} data={users} className="user-management-table" />
+      <Table 
+  columns={columns} 
+  data={users} 
+  onRowClick={handleRowClick} 
+  className="user-management-table" 
+/>
+
 
       <Suspense fallback={<div>Cargando modal...</div>}>
         {deleteConfirmOpen && (
@@ -155,6 +168,31 @@ const UserManagement = () => {
         </div>
       </Modal>
         )}
+        {detailsModalOpen && selectedUser && (
+  <Modal isOpen={detailsModalOpen} onClose={() => setDetailsModalOpen(false)}>
+    <h2>Detalles del Usuario</h2>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      <img
+        src={selectedUser.foto}
+        alt={`${selectedUser.nombre} ${selectedUser.apellido}`}
+        style={{ width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover" }}
+      />
+      <p><strong>Nombre:</strong> {selectedUser.nombre} {selectedUser.apellido}</p>
+      <p><strong>CI:</strong> {selectedUser.ci}</p>
+      <p><strong>Email:</strong> {selectedUser.email}</p>
+      <p><strong>Profesión:</strong> {selectedUser.profesion}</p>
+      <p><strong>Usuario:</strong> {selectedUser.usuario}</p>
+      <p><strong>Roles:</strong> {(selectedUser.roles || []).map(r => r.nombre).join(", ")}</p>
+<p><strong>Áreas:</strong> {(selectedUser.areas || []).map(a => a.nombre).join(", ")}</p>
+
+
+    </div>
+    <div style={{ marginTop: "1rem" }}>
+      <ButtonPrimary type="secondary" onClick={() => setDetailsModalOpen(false)}>Cerrar</ButtonPrimary>
+    </div>
+  </Modal>
+)}
+
       </Suspense>
     </div>
   );

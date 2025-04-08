@@ -4,23 +4,9 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
-const multer = require('multer');
-const path = require('path');
+const cloudinary = require('../config/cloudinary'); // si usas Cloudinary
 const fs = require('fs');
 
-// Configuración de Multer para almacenamiento local
-const uploadPath = path.join(__dirname, '../uploads/profile_images');
-if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
 
 // Configuración del transporter para nodemailer
 const transporter = nodemailer.createTransport({
@@ -31,31 +17,27 @@ const transporter = nodemailer.createTransport({
     }
   });
 
-const upload = multer({ 
-    storage: storage,
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Solo se permiten imágenes'), false);
-        }
-    },
-    limits: {
-        fileSize: 5 * 1024 * 1024 // Límite de 5MB
-    }
-});
+
 
 exports.register = [
-    upload.single('foto'), 
     async (req, res) => {
         console.log("Registro de usuario:", req.body);
         try {
             const { nombre, apellido, usuario, email, password, ci, profesion, roles, areas } = req.body;
 
-            if (!req.file) {
-                return res.status(400).json({ error: "La foto de perfil es requerida" });
-            }
-            const fotoUrl = `/uploads/images/${req.file.filename}`;
+            let imagenUrl = null;
+
+            if (req.file) {
+                  // Si usas Cloudinary
+                  const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'users',
+                  });
+                  imagenUrl = result.secure_url;
+            
+                  // Elimina el archivo temporal
+                  fs.unlinkSync(req.file.path);
+                }
+          
             const hashedPassword = await bcrypt.hash(password, 10);
 
             // Asegura que roles y areas estén como arrays de números
@@ -90,7 +72,7 @@ exports.register = [
                     password: hashedPassword,
                     ci,
                     profesion,
-                    foto: fotoUrl,
+                    foto: imagenUrl,
                     roles: {
                         create: parsedRoles.map(roleId => ({
                             role: { connect: { id: roleId } }

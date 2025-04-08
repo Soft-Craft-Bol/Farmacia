@@ -8,10 +8,11 @@ const {
   resetPassword 
 } = require('../controllers/auth.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
+const upload = require('../middlewares/upload');
 const router = express.Router();
 
 // Ruta para registro de usuarios
-router.post('/register', register);
+router.post('/register',  upload.single('foto'), register);
 
 // Ruta para inicio de sesión
 router.post('/login', login);
