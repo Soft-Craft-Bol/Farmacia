@@ -25,7 +25,6 @@ model User {
   profesion String?
   foto      String?
   roles     UserRole[]
-  equipos   UserTeam[]
   areas     UserArea[] // <- relación nueva
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -87,23 +86,3 @@ model UserArea {
 
   @@unique([userId, areaId])
 }
-
-model Team {
-  id        Int      @id @default(autoincrement())
-  nombre    String   @unique
-  descripcion String?
-  usuarios  UserTeam[]
-  createdAt DateTime @default(now())
-}
-
-model UserTeam {
-  id        Int    @id @default(autoincrement())
-  userId    Int    // Cambiado de String a Int
-  teamId    Int
-  user      User  @relation(fields: [userId], references: [id])
-  team      Team  @relation(fields: [teamId], references: [id])
-  createdAt DateTime @default(now())
-  @@unique([userId, teamId])
-}
-
-
