@@ -83,7 +83,10 @@ const TrabajoManagement = () => {
         <h2 className="trabajo-management-title">Gestión de Trabajos</h2>
         <LinkButton to={`/registerTrabajo`}>Agregar Trabajo</LinkButton>
       </div>
-
+ <div className="trabajo-management-header">
+        <h2 className="trabajo-management-title">Trabajos Pendientes</h2>
+        <LinkButton to={`/trabajos/pendientes`}>Gestionar pendientes</LinkButton>
+      </div>
       {/* Tabla de Trabajos Pendientes */}
       <h3>Trabajos Pendientes</h3>
       <Table columns={columns} data={trabajosPendientes} className="trabajo-management-table" />

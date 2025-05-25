@@ -135,6 +135,16 @@ const handleRowClick = (user) => {
     [ confirmDeleteUser, currentUser]
   );
 
+  const filteredUsers = useMemo(() => {
+    if (!filterText) return users;
+    const lowercased = filterText.toLowerCase();
+    return users.filter((user) =>
+      `${user.nombre} ${user.apellido} ${user.email} ${user.usuario} ${user.profesion}`
+        .toLowerCase()
+        .includes(lowercased)
+    );
+  }, [filterText, users]);
+  
   return (
     <div className="user-management-container">
       <Toaster dir="auto" closeButton richColors visibleToasts={2} duration={2000} position="bottom-right" />
@@ -142,13 +152,27 @@ const handleRowClick = (user) => {
         <h2 className="user-management-title">Gestión de Usuarios</h2>
          <LinkButton to={`/registerUser`}>Agregar Usuario</LinkButton>
       </div>
+      <div className="user-management-search">
+  <div className="search-input-wrapper">
+    <span className="search-icon">🔍</span>
+    <input
+      type="text"
+      value={filterText}
+      onChange={(e) => setFilterText(e.target.value)}
+      placeholder="Buscar usuario..."
+      className="search-input"
+    />
+    {filterText && (
+      <button onClick={() => setFilterText("")} className="clear-button">
+        ❌
+      </button>
+    )}
+  </div>
+</div>
 
-      <Table 
-  columns={columns} 
-  data={users} 
-  onRowClick={handleRowClick} 
-  className="user-management-table" 
-/>
+
+<Table columns={columns} data={filteredUsers} onRowClick={handleRowClick} />
+
 
 
       <Suspense fallback={<div>Cargando modal...</div>}>

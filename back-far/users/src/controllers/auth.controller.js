@@ -167,6 +167,7 @@ exports.login = async (req, res) => {
 
         res.json({
             token,
+            id: user.id,
             usuario: user.usuario,
             nombreCompleto: fullName,
             roles: roles,

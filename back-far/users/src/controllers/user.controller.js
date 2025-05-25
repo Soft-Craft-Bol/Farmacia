@@ -4,6 +4,8 @@ const cloudinary = require('../config/cloudinary');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
+const EQUIPO_SERVICE_URL = process.env.EQUIPO_SERVICE_URL || "http://localhost:4000/equipos";
 
 exports.getUsers = async (req, res) => {
     const users = await prisma.user.findMany();
@@ -256,5 +258,101 @@ exports.getUserNameById = async (req, res) => {
             error: "Error al obtener nombre de usuario",
             details: error.message
         });
+    }
+};
+
+
+exports.getUserWithEquipos = async (req, res) => {
+    const userId = parseInt(req.params.id);
+    if (isNaN(userId)) {
+        return res.status(400).json({ error: 'ID de usuario inválido' });
+    }
+
+    try {
+        // Obtener datos del usuario
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                roles: { include: { role: true } },
+                areas: { include: { area: true } }
+            }
+        });
+
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+        // Obtener equipos del microservicio de equipos
+        const equiposResponse = await axios.get(`${EQUIPO_SERVICE_URL}/user/${userId}`);
+        const equipos = equiposResponse.data;
+
+        // Formatear la respuesta
+        const response = {
+            ...user,
+            roles: user.roles.map(r => r.role),
+            areas: user.areas.map(a => a.area),
+            equipos,
+            foto: user.foto ? `${process.env.BASE_URL}${user.foto}` : null
+        };
+
+        res.json(response);
+    } catch (error) {
+        console.error("Error al obtener usuario con equipos:", error);
+        res.status(500).json({ 
+            error: "Error al obtener usuario con equipos",
+            details: error.message 
+        });
+    }
+};
+
+
+exports.getTecnicos = async (req, res) => {
+    try {
+        // Buscar el rol de "Tecnico"
+        const rolTecnico = await prisma.role.findUnique({
+            where: { nombre: "Tecnico" },
+            select: { id: true }
+        });
+
+        if (!rolTecnico) {
+            return res.status(404).json({ error: 'Rol "Tecnico" no encontrado' });
+        }
+
+        // Buscar todos los usuarios que tienen el rol de "Tecnico"
+        const tecnicos = await prisma.user.findMany({
+            where: {
+                roles: {
+                    some: { roleId: rolTecnico.id }
+                }
+            },
+            include: {
+                roles: {
+                    include: { role: true }
+                },
+                areas: {
+                    include: { area: true }
+                }
+            }
+        });
+
+        // Formatear la respuesta para simplificar el resultado
+        const response = tecnicos.map(user => ({
+            id: user.id,
+            nombre: user.nombre,
+            apellido: user.apellido,
+            usuario: user.usuario,
+            email: user.email,
+            ci: user.ci,
+            profesion: user.profesion,
+            item: user.item,
+            foto: user.foto ? `${process.env.BASE_URL}${user.foto}` : null,
+            roles: user.roles.map(r => r.role),
+            areas: user.areas.map(a => a.area),
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+        }));
+
+        res.json(response);
+    } catch (error) {
+        console.error("Error al obtener técnicos:", error);
+        res.status(500).json({ error: "Error al obtener técnicos" });
     }
 };

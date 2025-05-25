@@ -226,7 +226,7 @@ function UserForm() {
               <div className="photo-upload-container">
                 <div className="photo-preview">
                   {photoPreview ? (
-                    <img src={photoPreview} alt="Profile Preview" />
+                    <img src={"https://hwchamber.co.uk/wp-content/uploads/2022/04/avatar-placeholder.gif"} alt="Profile Preview" />
                   ) : (
                     <FaCamera className="camera-icon" />
                   )}

@@ -40,6 +40,7 @@ function LoginUser() {
 
         // Guardar datos del usuario
         const user = {
+          idUser: result.data.id || "",
           username: result.data.usuario || "",
           roles: result.data.roles || [],
           photo: result.data.foto || "",

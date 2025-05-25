@@ -99,12 +99,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
                 <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
                 <SidebarLink to="/trabajos/taskboard" icon={<BsKanban />} text="Tablero de seguimiento" />
+                <SidebarLink to="/trabajos/calendario" icon={<FaCalendarAlt />} text="Calendario" />
                 <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Solicitar Trabajo" />
+                <SidebarLink to="/trabajos/cronograma" icon={<RiTeamFill />} text="Solicitar Trabajo" />
                 <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Trabajos" />
               </>
             )}
             {isInformatico && (
               <>
+              <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
                 <SidebarLink to="/trabajos/taskboard" icon={<BsKanban />} text="Tablero de seguimiento" />
                 <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Crear Trabajo" />
               </>

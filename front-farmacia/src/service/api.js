@@ -50,6 +50,7 @@ export const getUserNameById = (id) => apiUsers.get(`/users/name/${id}`);
 export const addUser = (data) => apiUsers.post('/auth/register', data);
 export const updateUser = (id, data) => apiUsers.put(`/users/${id}`, data);
 export const getUserById = (id) => apiUsers.get(`/users/${id}`);
+export const getEquiposByUserId = (userId) => apiUsers.get(`/users/equipos/${userId}`);
 // export const getUserProfile = () => apiUsers.get('/auth/profile');
 export const getUserProfile = async () => {
   try {
@@ -74,6 +75,7 @@ export const createEquipo = (data) => apiEquipos.post('/equipos', data);
 export const deleteEquipo = (id) => apiEquipos.delete(`/equipos/${id}`);
 export const updateEquipo = (id, data) => apiEquipos.put(`/equipos/${id}`, data);
 
+
 export const createTeam = (data) => apiUsers.post('/teams/create', data);
 export const addUsersToTeam = (data) => apiUsers.post('/teams/add-users', data);
 export const getTeamsWithUsers = () => apiUsers.get('/teams/teams-with-users');
@@ -84,6 +86,7 @@ export const deleteRole = (id) => apiUsers.delete(`/auth/roles/${id}`);
 export const updateRole = (id, data) => apiUsers.put(`/auth/roles/${id}`, data); 
 export const assignRoleToUser = (userId, roleId) =>apiUsers.put(`/auth/assign-role/${userId}`, { roleId });
 export const getPermissions = () => apiUsers.get('/auth/roles/permisos');
+export const getTecnicos = () => apiUsers.get('/users/tecnicos');
 
 
 
@@ -91,6 +94,7 @@ export const createTrabajo = (data) => apiTrabajos.post('/trabajos', data);
 export const getTrabajos = () => apiTrabajos.get('/trabajos');
 export const deleteTrabajo = (id) => apiTrabajos.delete(`/trabajos/${id}`);
 export const getTrabajoById = (id) => apiTrabajos.get(`/trabajos/${id}`);
+export const updateTrabajo = (id, data) => apiTrabajos.put(`/trabajos/${id}`, data);
 export const addUsersToTrabajo = (trabajoId, users) => apiTrabajos.post(`/trabajos/${trabajoId}/equipos`, { users });
 export const removeUserFromTrabajo = (trabajoId, userId) => apiTrabajos.delete(`/trabajos/${trabajoId}/equipos/${userId}`);
 export const UpdateEstado  = (trabajoId, estado) => apiTrabajos.patch(`/trabajos/${trabajoId}/estado`, { estado });

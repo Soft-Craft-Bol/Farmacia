@@ -25,6 +25,8 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { RiTeamFill } from "react-icons/ri";
 import { FaUsersGear } from "react-icons/fa6";
 import { PiUsersFourDuotone } from "react-icons/pi";
+import { FaCheck } from "react-icons/fa6";
+import { FaTimes } from "react-icons/fa";
 
 
 export {
@@ -54,5 +56,6 @@ export {
   PiChalkboardTeacher,
   RiTeamFill,
   FaUsersGear,
-  PiUsersFourDuotone
+  PiUsersFourDuotone,
+  FaCheck, FaTimes,
 };

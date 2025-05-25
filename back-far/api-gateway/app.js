@@ -1,40 +1,42 @@
-// api-gateway/app.js
 const express = require('express');
-const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
 
-// Configuración de CORS
+// Config CORS (ajusta los orígenes según necesidades)
 app.use(cors({
-    origin: "http://localhost:5173",
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    credentials: true
+  origin: ['http://localhost:5174', 'http://tu-frontend.com'],
+  credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Proxy para microservicio de Usuarios
-app.use('/users', createProxyMiddleware({
-    target: process.env.USERS_SERVICE_URL,
+// Routes
+app.use('/users', 
+  createProxyMiddleware({ 
+    target: 'http://localhost:5000', 
     changeOrigin: true,
-    pathRewrite: { '^/users': '' }
-}));
+    pathRewrite: { '^/users': '/' } 
+  })
+);
 
-// Proxy para microservicio de Equipos
-app.use('/equipos', createProxyMiddleware({
-    target: process.env.EQUIPOS_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: { '^/equipos': '' }
-}));
+app.use('/equipos', 
+  createProxyMiddleware({ 
+    target: 'http://localhost:4000',
+    changeOrigin: true 
+  })
+);
 
-// Proxy para microservicio de Trabajos
-app.use('/trabajos', createProxyMiddleware({
-    target: process.env.TRABAJOS_SERVICE_URL,
+app.use('/trabajos', 
+  createProxyMiddleware({ 
+    target: 'http://localhost:6000',
     changeOrigin: true,
-    pathRewrite: { '^/trabajos': '' }
-}));
+    onError: (err, req, res) => {
+      res.status(503).json({ error: 'Servicio de trabajos no disponible' });
+    }
+  })
+);
+
+// Health Check
+app.get('/health', (req, res) => res.status(200).send('OK'));
 
 module.exports = app;

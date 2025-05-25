@@ -33,12 +33,35 @@ model Equipo {
   documentoUrl2    String?
   documentoUrl3    String?
   documentoUrl4    String?
+
+  intervaloMantenimiento Int       @default(180) // Días (6 meses)
+  ultimoMantenimiento    DateTime? // Fecha del último mantenimiento
+  proximoMantenimiento   DateTime? // Fecha predicha
+  horasUsoAcumuladas     Int       @default(0)
+  historialMantenimientos HistorialMantenimiento[]
+
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   userId           Int       @default(1) 
+  nombreUsuario    String?
+  periodoMantenimiento Int?
   componentes      ComponenteEquipo[]
   imagenes         ImagenEquipo[]
   documentos       DocumentoEquipo[]
+}
+
+model HistorialMantenimiento {
+  id          Int       @id @default(autoincrement())
+  equipo      Equipo    @relation(fields: [equipoId], references: [id])
+  equipoId    Int
+  fechaInicio DateTime
+  fechaFin    DateTime
+  tipo        String    // "Preventivo", "Correctivo", "Predictivo"
+  descripcion String?
+  horasUso    Int       // Horas de uso del equipo hasta ese momento
+  tecnicoId   Int
+  tecnicoNombre String
+  createdAt   DateTime  @default(now())
 }
 
 model ComponenteEquipo {

@@ -1,22 +1,38 @@
-version: '3.8'
+version: '3.9'
 services:
-  users:
-    build: ./users
-    ports:
-      - "4000:4000"
   trabajos:
-    build: ./trabajos
+    build:
+      context: ./trabajos
+    environment:
+      - PORT=7000
+      - DATABASE_URL=postgresql://gaspar:armando1gaspar@localhost:5432/trabajos
+    ports:
+      - "7000:7000"
+    networks:
+      - backend
+
+  users:
+    build:
+      context: ./users
+    environment:
+      - PORT=5000
+      - DATABASE_URL=postgresql://gaspar:armando1gaspar@localhost:5432/trabajos
     ports:
       - "5000:5000"
+    networks:
+      - backend
+
   equipos:
-    build: ./equipos
+    build:
+      context: ./equipos
+    environment:
+      - PORT=8000
+      - DATABASE_URL=postgresql://gaspar:armando1gaspar@localhost:5432/trabajos
     ports:
-      - "6000:6000"
-  api-gateway:
-    build: ./api-gateway
-    ports:
-      - "3000:3000"
-    depends_on:
-      - users
-      - trabajos
-      - equipos
+      - "8000:8000"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
