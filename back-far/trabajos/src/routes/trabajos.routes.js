@@ -8,7 +8,9 @@ const {
   getTrabajoById,
   getAllTrabajos,
   removeUserFromTrabajo,
-  updateEstadoTrabajo 
+  updateEstadoTrabajo,
+  aceptarTrabajo,
+  rechazarTrabajo,
 } = require('../controllers/trabajos.controller.js');
 
 router.post('/', upload.single('imagen'), createTrabajo);
@@ -23,7 +25,8 @@ router.delete('/:trabajoId/equipos/:userId', removeUserFromTrabajo);
 
 router.patch('/:trabajoId/estado', updateEstadoTrabajo);
 
-
+router.put('/:trabajoId/aceptar', aceptarTrabajo);
+router.put('/:trabajoId/rechazar', rechazarTrabajo);
 
 
 module.exports = router;

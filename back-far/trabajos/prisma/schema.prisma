@@ -14,12 +14,65 @@ model Trabajo {
   fechaInicio  DateTime
   fechaFin     DateTime?
   area         String?
-  encargadoId  String
+  tipoEquipo  String?
   estado       String          @default("Pendiente")
+  prioridad   Prioridad         @default(Media)
   imagenes     String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   equipos     TrabajoEquipo[]
+  areaId      String?
+  equipoId     Int?
+  nombreEquipo String?
+  encargadoId  Int?
+  encargadoNombre String?
+  asignaciones TrabajoAsignacion[]
+  historial   HistorialTrabajo[]
+}
+
+
+
+
+model TrabajoAsignacion {
+  id         Int       @id @default(autoincrement())
+  trabajo    Trabajo   @relation(fields: [trabajoId], references: [id])
+  trabajoId  Int
+  tecnicoId  Int?                     // ID del técnico en otro microservicio
+  tecnicoNombre String?               // Nombre denormalizado del técnico
+  fechaAsignacion DateTime @default(now())
+  fechaInicio DateTime
+  fechaFin    DateTime?
+  observaciones String?
+  
+  @@unique([trabajoId, tecnicoId])
+}
+
+
+model HistorialTrabajo {
+  id        Int           @id @default(autoincrement())
+  trabajo   Trabajo       @relation(fields: [trabajoId], references: [id])
+  trabajoId Int
+  estado    EstadoTrabajo
+  fechaCambio DateTime    @default(now()) 
+  usuarioId Int          
+  usuarioNombre String   
+  comentario String?
+}
+
+enum EstadoTrabajo {
+  Pendiente
+  Aceptado
+  EnProgreso
+  Rechazado
+  Finalizado
+  Cancelado
+}
+
+enum Prioridad {
+  Baja
+  Media
+  Alta
+  Urgente
 }
 
 model TrabajoEquipo {

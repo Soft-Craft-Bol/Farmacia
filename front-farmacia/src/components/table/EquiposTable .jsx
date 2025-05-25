@@ -10,6 +10,8 @@ const EquiposTable = ({ data, onDelete }) => {
   const [rowsPerPageSelection, setRowsPerPageSelection] = useState(10);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [selectedEquipo, setSelectedEquipo] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
 
   // Definición de columnas
   const columns = [
@@ -82,9 +84,23 @@ const EquiposTable = ({ data, onDelete }) => {
     }
   ];
 
+  const filteredData = useMemo(() => {
+    return data.filter((equipo) => {
+      const term = searchTerm.toLowerCase();
+      return (
+        equipo.etiquetaActivo?.toLowerCase().includes(term) ||
+        equipo.modelo?.toLowerCase().includes(term) ||
+        equipo.ubicacion?.toLowerCase().includes(term) ||
+        equipo.proveedor?.toLowerCase().includes(term) ||
+        equipo.estado?.toLowerCase().includes(term) ||
+        equipo.tipoMantenimiento?.toLowerCase().includes(term)
+      );
+    });
+  }, [data, searchTerm]);
+
   // Ordenar los datos
   const sortedData = useMemo(() => {
-    let sortableData = [...data];
+    let sortableData = [...filteredData];
     if (sortConfig.key) {
       sortableData.sort((a, b) => {
         const aValue = a[sortConfig.key];
@@ -110,7 +126,7 @@ const EquiposTable = ({ data, onDelete }) => {
       });
     }
     return sortableData;
-  }, [data, sortConfig]);
+  }, [filteredData, sortConfig]);
 
   // Calcular datos para la página actual
   const paginatedData = useMemo(() => {
@@ -143,6 +159,9 @@ const EquiposTable = ({ data, onDelete }) => {
     setCurrentPage(1);
   };
 
+
+  
+
   return (
     <div className="table-container">
       <button 
@@ -151,6 +170,15 @@ const EquiposTable = ({ data, onDelete }) => {
       >
         <FiPlusCircle /> Agregar Equipo
       </button>
+      <div className="search-bar">
+  <input
+    type="text"
+    placeholder="Buscar por etiqueta, modelo, ubicación..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="search-input"
+  />
+</div>
 
       <table className="equipos-table">
         <thead>

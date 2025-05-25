@@ -323,6 +323,32 @@ const actualizarEquipo = async (req, res) => {
   }
 };
 
+const getEquiposByUserId = async (req, res) => {
+    const userId = parseInt(req.params.userId);
+    if (isNaN(userId)) {
+        return res.status(400).json({ error: 'ID de usuario inválido' });
+    }
+
+    try {
+        const equipos = await prisma.equipo.findMany({
+            where: { userId },
+            include: {
+                componentes: true,
+                imagenes: true,
+                documentos: true,
+            }
+        });
+        
+        res.json(equipos);
+    } catch (error) {
+        console.error("Error al obtener equipos por usuario:", error);
+        res.status(500).json({ 
+            error: "Error al obtener equipos por usuario",
+            details: error.message 
+        });
+    }
+};
+
 
 module.exports = {
   uploadMiddleware, 
@@ -330,6 +356,7 @@ module.exports = {
   obtenerEquipos,
   eliminarEquipo,
   obtenerEquipoPorId,
-  actualizarEquipo
+  actualizarEquipo,
+  getEquiposByUserId
 };
 
