@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import Table from "../../components/table/Table";
 import { FaCheck, FaTimes } from "../../hooks/icons";
-import { getTrabajos, updateTrabajo, getTecnicos } from "../../service/api";
+import { getTrabajos, rechazarTrabajo, aceptarTrabajo, getTecnicos } from "../../service/api";
 import { Toaster, toast } from "sonner";
 import LinkButton from "../../components/buttons/LinkButton";
 import "../users/ListUser.css";
 import { ButtonPrimary } from "../../components/buttons/ButtonPrimary";
 import Modal from "../../components/modal/Modal";
 import { getUser } from "../login/authFuntions";
-import Select from "../../components/select/Select";
 
 const TrabajosPendientes = () => {
   const [trabajos, setTrabajos] = useState([]);
@@ -20,56 +19,85 @@ const TrabajosPendientes = () => {
   const [description, setDescription] = useState("");
   const [tecnicoId, setTecnicoId] = useState("");
   const currentUser = getUser();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const trabajosResponse = await getTrabajos();
-        setTrabajos(trabajosResponse.data.filter(t => t.estado === "Pendiente"));
+        const [trabajosResponse, tecnicosResponse] = await Promise.all([
+          getTrabajos(),
+          getTecnicos()
+        ]);
         
-        const tecnicosResponse = await getTecnicos();
-        setTecnicos(tecnicosResponse.data.filter(t => t.id !== currentUser.id));
+        setTrabajos(trabajosResponse.data.filter(t => t.estado === "Pendiente"));
+        // Mostrar todos los técnicos sin filtrar
+        setTecnicos(tecnicosResponse.data);
       } catch (error) {
-        toast.error("Error al cargar datos");
+        toast.error("Error al cargar datos: " + (error.message || "Error desconocido"));
+      } finally {
+        setIsLoading(false);
       }
     };
+    
     fetchData();
-  }, [currentUser.id]);
+  }, []);
+
+  const handleAction = (trabajo, actionType) => {
+    setTrabajoToUpdate(trabajo);
+    setAction(actionType);
+    // Resetear campos al cambiar de acción
+    setStartDate("");
+    setEndDate("");
+    setDescription("");
+    setTecnicoId("");
+  };
 
   const handleUpdateStatus = async () => {
-    if (action === "accept" && (!startDate || !tecnicoId)) {
-      toast.error("Fecha de inicio y técnico son requeridos");
-      return;
-    }
-
+    if (!trabajoToUpdate) return;
+    
+    setIsLoading(true);
     try {
-      const newStatus = action === "accept" ? "Aceptado" : "Rechazado";
-      const updateData = { 
-        estado: newStatus,
-        descripcion,
-      };
-
       if (action === "accept") {
-        updateData.fechaInicio = startDate;
-        updateData.fechaFin = endDate;
-        updateData.tecnicoId = tecnicoId;
+        if (!startDate || !tecnicoId) {
+        throw new Error("Fecha de inicio y técnico son requeridos");
       }
 
-      await updateTrabajo(trabajoToUpdate.id, updateData);
+      const response = await aceptarTrabajo(trabajoToUpdate.id, {
+        tecnicoId: parseInt(tecnicoId),
+        encargadoId: trabajoToUpdate.encargadoId,
+        fechaInicio: startDate,
+        fechaFin: endDate || null,
+        descripcion: description || null
+      });
+
+      toast.success(response.data?.message || "Trabajo aceptado correctamente");
+      } else {
+        if (!description) {
+          throw new Error("El motivo del rechazo es requerido");
+        }
+
+        const response = await rechazarTrabajo(trabajoToUpdate.id, {
+          motivo: description,
+          encargadoId: trabajoToUpdate.encargadoId // Enviamos el ID del solicitante original
+        });
+
+        toast.success(response.data?.message || "Trabajo rechazado correctamente");
+      }
+
+      // Actualizar lista eliminando el trabajo procesado
       setTrabajos(prev => prev.filter(t => t.id !== trabajoToUpdate.id));
-      toast.success(`Trabajo ${newStatus.toLowerCase()} exitosamente.`);
-    } catch (error) {
-      toast.error(`Error al ${action === "accept" ? "aceptar" : "rechazar"} el trabajo.`);
-    } finally {
       setTrabajoToUpdate(null);
-      setAction("");
-      setStartDate("");
-      setEndDate("");
-      setDescription("");
-      setTecnicoId("");
+      
+    } catch (error) {
+      toast.error(error.response?.data?.error || error.message || "Error al procesar la solicitud");
+      console.error("Error al actualizar el trabajo:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Resto del código permanece igual...
   const columns = [
     { header: "ID", accessor: "id" },
     { header: "Nombre", accessor: "nombre" },
@@ -81,21 +109,17 @@ const TrabajosPendientes = () => {
         <div className="trabajo-management-table-actions">
           <ButtonPrimary 
             type="success" 
-            onClick={() => {
-              setTrabajoToUpdate(row);
-              setAction("accept");
-            }}
+            onClick={() => handleAction(row, "accept")}
             title="Aceptar trabajo"
+            disabled={isLoading}
           >
             <FaCheck />
           </ButtonPrimary>
           <ButtonPrimary 
             type="danger" 
-            onClick={() => {
-              setTrabajoToUpdate(row);
-              setAction("reject");
-            }}
+            onClick={() => handleAction(row, "reject")}
             title="Rechazar trabajo"
+            disabled={isLoading}
           >
             <FaTimes />
           </ButtonPrimary>
@@ -113,10 +137,14 @@ const TrabajosPendientes = () => {
         <LinkButton to="/registerTrabajo">Agregar Trabajo</LinkButton>
       </div>
 
-      <Table columns={columns} data={trabajos} className="trabajo-management-table" />
+      {isLoading ? (
+        <div>Cargando...</div>
+      ) : (
+        <Table columns={columns} data={trabajos} className="trabajo-management-table" />
+      )}
 
       {trabajoToUpdate && (
-        <Modal isOpen={!!trabajoToUpdate} onClose={() => setTrabajoToUpdate(null)}>
+        <Modal isOpen={!!trabajoToUpdate} onClose={() => !isLoading && setTrabajoToUpdate(null)}>
           <div className="trabajo-modal-container">
             <h2 className="trabajo-modal-title">Confirmar {action === "accept" ? "Aceptación" : "Rechazo"}</h2>
             
@@ -132,6 +160,7 @@ const TrabajosPendientes = () => {
                     value={startDate} 
                     onChange={(e) => setStartDate(e.target.value)} 
                     required
+                    disabled={isLoading}
                   />
                 </div>
                 
@@ -143,6 +172,7 @@ const TrabajosPendientes = () => {
                     value={endDate} 
                     onChange={(e) => setEndDate(e.target.value)} 
                     min={startDate}
+                    disabled={isLoading}
                   />
                 </div>
                 
@@ -153,6 +183,7 @@ const TrabajosPendientes = () => {
                     value={tecnicoId}
                     onChange={(e) => setTecnicoId(e.target.value)}
                     required
+                    disabled={isLoading}
                   >
                     <option value="">Seleccione un técnico</option>
                     {tecnicos.map(tecnico => (
@@ -172,6 +203,7 @@ const TrabajosPendientes = () => {
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
                 required={action === "reject"}
+                disabled={isLoading}
               />
             </div>
             
@@ -179,12 +211,14 @@ const TrabajosPendientes = () => {
               <ButtonPrimary 
                 className={`trabajo-modal-btn ${action === "accept" ? "accept-btn" : "reject-btn"}`}
                 onClick={handleUpdateStatus}
+                disabled={isLoading}
               >
-                Confirmar {action === "accept" ? "Aceptación" : "Rechazo"}
+                {isLoading ? "Procesando..." : `Confirmar ${action === "accept" ? "Aceptación" : "Rechazo"}`}
               </ButtonPrimary>
               <ButtonPrimary 
                 className="trabajo-modal-btn cancel-btn"
-                onClick={() => setTrabajoToUpdate(null)}
+                onClick={() => !isLoading && setTrabajoToUpdate(null)}
+                disabled={isLoading}
               >
                 Cancelar
               </ButtonPrimary>

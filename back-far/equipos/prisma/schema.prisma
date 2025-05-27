@@ -23,8 +23,10 @@ model Equipo {
   ubicacion        String
   tipoMantenimiento String
   fechaCompra      DateTime
+  fechaInicioUso DateTime?
   proveedor        String
   numeroOrden      String
+  tipoEquipo       String?
   fotoUrl1         String?
   fotoUrl2         String?
   fotoUrl3         String?
@@ -33,8 +35,6 @@ model Equipo {
   documentoUrl2    String?
   documentoUrl3    String?
   documentoUrl4    String?
-
-  intervaloMantenimiento Int       @default(180) // Días (6 meses)
   ultimoMantenimiento    DateTime? // Fecha del último mantenimiento
   proximoMantenimiento   DateTime? // Fecha predicha
   horasUsoAcumuladas     Int       @default(0)

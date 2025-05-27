@@ -148,3 +148,15 @@
   .document-link:hover {
     background-color: #e3f2fd;
   }
+
+  .modal-content {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 80vh;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+.modal-content::-webkit-scrollbar {
+    display: none;
+}

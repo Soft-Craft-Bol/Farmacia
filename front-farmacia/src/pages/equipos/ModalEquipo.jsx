@@ -1,9 +1,13 @@
 import React from 'react';
 import { FiX } from 'react-icons/fi';
-import './ModalEquipo.css'; // Asegúrate de tener estilos para el modal
+import './ModalEquipo.css'; 
+import { exportEquipoPDF } from '../../utils/exportEquipoPdf';
+
 
 const ModalEquipo = ({ equipo, onClose }) => {
   if (!equipo) return null;
+
+  
 
   // Obtener todas las imágenes no nulas
   const images = [
@@ -33,6 +37,21 @@ const ModalEquipo = ({ equipo, onClose }) => {
           <span className={`estado-badge ${equipo.estado.toLowerCase().replace(' ', '-')}`}>
             {equipo.estado}
           </span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+          <button
+            onClick={() => exportEquipoPDF(equipo)}
+            style={{
+              padding: "6px 12px",
+              backgroundColor: "#2980b9",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer"
+            }}
+          >
+            Exportar a PDF
+          </button>
         </div>
 
         <div className="modal-content">

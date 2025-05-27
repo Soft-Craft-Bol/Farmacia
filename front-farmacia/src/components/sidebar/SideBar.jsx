@@ -94,12 +94,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <ul className="menu-links">
             <SidebarLink to="/profile" icon={<FaUserCircle />} text="Perfil" />
             <SidebarLink to="/home" icon={<FaHome />} text="Dashboard" />
+            <SidebarLink to="/trabajos/taskboard" icon={<BsKanban />} text="Tablero de seguimiento" />
+              <SidebarLink to="/trabajos/calendario" icon={<FaCalendarAlt />} text="Calendario" />
             {isAdmin && (
               <>
                 <SidebarLink to="/userManagement" icon={<FaUsersGear />} text="Usuarios" />
                 <SidebarLink to="/equipos" icon={<PiChalkboardTeacher />} text="Equipos" />
-                <SidebarLink to="/trabajos/taskboard" icon={<BsKanban />} text="Tablero de seguimiento" />
-                <SidebarLink to="/trabajos/calendario" icon={<FaCalendarAlt />} text="Calendario" />
+                
+              
                 <SidebarLink to="/trabajos/register" icon={<RiTeamFill />} text="Solicitar Trabajo" />
                 <SidebarLink to="/trabajos/cronograma" icon={<RiTeamFill />} text="Solicitar Trabajo" />
                 <SidebarLink to="/trabajos" icon={<GrAnalytics />} text="Trabajos" />

@@ -28,6 +28,7 @@ model Trabajo {
   encargadoNombre String?
   asignaciones TrabajoAsignacion[]
   historial   HistorialTrabajo[]
+  reportes    ReporteFinalizacion[]
 }
 
 
@@ -57,6 +58,7 @@ model HistorialTrabajo {
   usuarioId Int          
   usuarioNombre String   
   comentario String?
+  metadata     String?
 }
 
 enum EstadoTrabajo {
@@ -85,4 +87,21 @@ model TrabajoEquipo {
   trabajo   Trabajo  @relation(fields: [trabajoId], references: [id])
 
   @@unique([trabajoId, userId])
+}
+
+
+model ReporteFinalizacion {
+  id                 Int       @id @default(autoincrement())
+  trabajo            Trabajo   @relation(fields: [trabajoId], references: [id])
+  trabajoId          Int
+  tecnicoId          Int
+  fechaFinalizacion  DateTime
+  observaciones      String?
+  solucionAplicada   String?
+  materialesUtilizados String?
+  horasTrabajadas    Float?
+  recomendaciones    String?
+  documentos         String?   
+  imagenes           String?   
+  createdAt          DateTime  @default(now())
 }

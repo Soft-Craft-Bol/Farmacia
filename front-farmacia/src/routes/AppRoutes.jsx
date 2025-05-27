@@ -21,9 +21,10 @@ const TrabajoManagement = lazy(() => import("../pages/users/TrabajoList"));
 const TrabajoAddUsers = lazy(() => import("../pages/users/TrabajoAddUsers")); 
 const TrabajoUserList = lazy(() => import("../pages/users/TrabajoUserList"));
 const Taskboard = lazy(() => import("../pages/trabajos/TaskBoardtask.jsx"));
-const Cronograma = lazy(() => import("../pages/cronograma/Cronograma"));
+const CronogramaMantenimiento = lazy(() => import("../pages/cronograma/Cronograma"));
 const CalendarioMantenimientos = lazy(() => import("../pages/cronograma/Calendario"));
 const TrabajoPendientes = lazy(() => import("../pages/trabajos/TrabajosPendientes.jsx"));
+const FinalizarTrabajoForm = lazy(() => import("../pages/trabajos/FinalizarTrabajoForm.jsx"));
 
 
 const AppRoutes = () => (
@@ -52,9 +53,12 @@ const AppRoutes = () => (
     <Route path="/trabajos/:trabajoId/add-users" element={<PrivateRoute><TrabajoAddUsers /></PrivateRoute>} />
     <Route path="/trabajos/:trabajoId/users" element={<PrivateRoute><TrabajoUserList /></PrivateRoute>} />
     <Route path="/trabajos/taskboard" element={<PrivateRoute><Taskboard /></PrivateRoute>} />
-    <Route path="/trabajos/cronograma" element={<PrivateRoute><Cronograma /></PrivateRoute>} />
+    <Route path="/trabajos/cronograma" element={<PrivateRoute><CronogramaMantenimiento /></PrivateRoute>} />
     <Route path="/trabajos/calendario" element={<PrivateRoute><CalendarioMantenimientos /></PrivateRoute>} />
     <Route path="/trabajos/pendientes" element={<PrivateRoute><TrabajoPendientes /></PrivateRoute>} />
+    <Route path="/finalizar" element={<PrivateRoute><FinalizarTrabajoForm /></PrivateRoute>} />
+    
+    {/* Ruta del sidebar */}
   </Routes>
 );
 
