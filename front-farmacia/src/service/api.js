@@ -74,6 +74,7 @@ export const getEquipoById = (id) => apiEquipos.get(`/equipos/${id}`);
 export const createEquipo = (data) => apiEquipos.post('/equipos', data);
 export const deleteEquipo = (id) => apiEquipos.delete(`/equipos/${id}`);
 export const updateEquipo = (id, data) => apiEquipos.put(`/equipos/${id}`, data);
+export const getProximoMantenimiento = () => apiEquipos.get('/mantenimiento');
 
 
 export const createTeam = (data) => apiUsers.post('/teams/create', data);
@@ -92,12 +93,22 @@ export const getTecnicos = () => apiUsers.get('/users/tecnicos');
 
 export const createTrabajo = (data) => apiTrabajos.post('/trabajos', data);
 export const getTrabajos = () => apiTrabajos.get('/trabajos');
+export const getTrabajosByUser = (userId) => apiTrabajos.get(`/trabajos-tecnico/carga/${userId}`);
 export const deleteTrabajo = (id) => apiTrabajos.delete(`/trabajos/${id}`);
 export const getTrabajoById = (id) => apiTrabajos.get(`/trabajos/${id}`);
 export const updateTrabajo = (id, data) => apiTrabajos.put(`/trabajos/${id}`, data);
 export const addUsersToTrabajo = (trabajoId, users) => apiTrabajos.post(`/trabajos/${trabajoId}/equipos`, { users });
 export const removeUserFromTrabajo = (trabajoId, userId) => apiTrabajos.delete(`/trabajos/${trabajoId}/equipos/${userId}`);
 export const UpdateEstado  = (trabajoId, estado) => apiTrabajos.patch(`/trabajos/${trabajoId}/estado`, { estado });
+export const aceptarTrabajo = (trabajoId, data) => apiTrabajos.put(`/trabajos/${trabajoId}/aceptar`, data);
+export const rechazarTrabajo = (trabajoId, data) => apiTrabajos.put(`/trabajos/${trabajoId}/rechazar`, data);
+export const finalizarTrabajo = (trabajoId, tecnicoId, data) => 
+  apiTrabajos.put(`/trabajos-tecnico/${trabajoId}/finalizar-tecnico/${tecnicoId}`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+export const getTrababjosPendienteRechazado = () => apiTrabajos.get('/trabajos-tecnico/pendientes');
 
 export const updateEstadoTrabajo = (trabajoId, estado) => 
   apiTrabajos.patch(`/trabajos/${trabajoId}/estado`, { estado });

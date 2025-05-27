@@ -65,23 +65,37 @@ const registrarEquipo = async (req, res) => {
       });
     }
 
-    // Verificar si el equipo ya existe
-    const equipoExistente = await prisma.equipo.findUnique({
-      where: { etiquetaActivo }
-    });
+    // Verificar si el equipo ya existe por etiqueta de activo O número de serie
+    const [equipoPorEtiqueta, equipoPorSerie] = await Promise.all([
+      prisma.equipo.findUnique({ where: { etiquetaActivo } }),
+      prisma.equipo.findUnique({ where: { numeroSerie } })
+    ]);
 
-    if (equipoExistente) {
-      return res.status(400).json({ error: "La etiqueta de activo ya existe. Usa una diferente." });
+    if (equipoPorEtiqueta && equipoPorSerie) {
+      return res.status(400).json({ 
+        error: "Ya existe un equipo con esta etiqueta de activo y número de serie",
+        camposDuplicados: ['etiquetaActivo', 'numeroSerie']
+      });
     }
 
-    // Manejo de archivos subidos
+    if (equipoPorEtiqueta) {
+      return res.status(400).json({ 
+        error: "Ya existe un equipo con esta etiqueta de activo",
+        campoDuplicado: 'etiquetaActivo'
+      });
+    }
+
+    if (equipoPorSerie) {
+      return res.status(400).json({ 
+        error: "Ya existe un equipo con este número de serie",
+        campoDuplicado: 'numeroSerie'
+      });
+    }
+
+    // Resto del código para manejar archivos y crear el equipo...
     const imagenes = req.files['imagenes'] || [];
     const documentos = req.files['documentos'] || [];
     
-    // Tomar la primera imagen y documento como principales
-    //const fotoUrl = imagenes.length > 0 ? `/uploads/images/${imagenes[0].filename}` : null;
-    //const documentoUrl = documentos.length > 0 ? `/uploads/documents/${documentos[0].filename}` : null;
-
     const archivosData = {
       fotoUrl1: imagenes[0] ? `/uploads/images/${imagenes[0].filename}` : null,
       fotoUrl2: imagenes[1] ? `/uploads/images/${imagenes[1].filename}` : null,
@@ -93,7 +107,6 @@ const registrarEquipo = async (req, res) => {
       documentoUrl4: documentos[3] ? `/uploads/documents/${documentos[3].filename}` : null,
     };
 
-    // Parsear los componentes
     let componentesArray = [];
     try {
       componentesArray = componentes ? JSON.parse(componentes) : [];
@@ -102,7 +115,8 @@ const registrarEquipo = async (req, res) => {
       componentesArray = [];
     }
 
-    // Guardar el equipo en la base de datos
+    console.log("Componentes parseados:", req.body.fechaInicio);
+
     const equipo = await prisma.equipo.create({
       data: {
         etiquetaActivo,
@@ -111,6 +125,13 @@ const registrarEquipo = async (req, res) => {
         estado,
         ubicacion,
         tipoMantenimiento,
+        fechaInicioUso: req.body.fechaInicio ? new Date(req.body.fechaInicio) : null,
+        periodoMantenimiento: req.body.periodoMantenimiento ? parseInt(req.body.periodoMantenimiento) : null,
+        proximoMantenimiento: req.body.fechaInicioUso && req.body.periodoMantenimiento 
+      ? new Date(new Date(req.body.fechaInicioUso).setMonth(
+          new Date(req.body.fechaInicioUso).getMonth() + parseInt(req.body.periodoMantenimiento)
+        ))
+      : null,
         fechaCompra: fechaCompra ? new Date(fechaCompra) : null,
         proveedor,
         numeroOrden,
@@ -125,7 +146,7 @@ const registrarEquipo = async (req, res) => {
           create: imagenes.map(img => ({
             url: `/uploads/images/${img.filename}`,
             file: img.originalname,
-            isExisting: false // Todos los archivos subidos son nuevos
+            isExisting: false
           }))
         },
         documentos: {
@@ -133,7 +154,7 @@ const registrarEquipo = async (req, res) => {
             name: doc.originalname,
             file: doc.filename,
             type: doc.mimetype,
-            isExisting: false // Todos los documentos subidos son nuevos
+            isExisting: false
           }))
         }
       },
@@ -147,9 +168,28 @@ const registrarEquipo = async (req, res) => {
     res.status(201).json(equipo);
   } catch (error) {
     console.error("Error al registrar equipo:", error);
+    
+    // Manejo específico para errores de Prisma
+    if (error.code === 'P2002') {
+      const field = error.meta?.target?.[0];
+      let errorMessage = 'Error de duplicación de datos';
+      
+      if (field === 'etiquetaActivo') {
+        errorMessage = 'Ya existe un equipo con esta etiqueta de activo';
+      } else if (field === 'numeroSerie') {
+        errorMessage = 'Ya existe un equipo con este número de serie';
+      }
+      
+      return res.status(400).json({ 
+        error: errorMessage,
+        campoDuplicado: field
+      });
+    }
+    
+    // Error genérico para otros casos
     res.status(500).json({ 
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: "Ocurrió un error al registrar el equipo",
+      detalles: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

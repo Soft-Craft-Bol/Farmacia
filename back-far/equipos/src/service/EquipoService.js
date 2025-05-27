@@ -17,7 +17,7 @@ class EquipoService {
       fallos: {
         reduccionPorFallo: 0.1,
         min: 0.5
-      }
+      } 
     };
   }
 

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { getTrabajos } from "../../service/api";
+import { getTrabajosByUser, getTrababjosPendienteRechazado } from "../../service/api";
+import { getUser } from "../login/authFuntions";
 import './CalendarioMantenimientos.css';
 
 // Configuración de localización
@@ -12,28 +13,58 @@ const localizer = momentLocalizer(moment);
 const CalendarioMantenimientos = () => {
   const [trabajos, setTrabajos] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const currentUser = getUser();
 
   useEffect(() => {
     const fetchTrabajos = async () => {
       try {
-        const response = await getTrabajos();
-        setTrabajos(response.data);
+        if (!currentUser) return;
+
+        if (currentUser.roles[0] === 'Administrador') {
+          const response = await getTrababjosPendienteRechazado();
+          const trabajosAdmin = response.data?.data || [];
+          
+          setTrabajos(trabajosAdmin.map(trabajo => {
+  const fechaInicio = trabajo.fechaInicio ? new Date(trabajo.fechaInicio) : new Date();
+  const fechaFin = trabajo.fechaFin ? new Date(trabajo.fechaFin) : fechaInicio; // si no tiene fin, usar inicio
+  return {
+    ...trabajo,
+    fechaInicio,
+    fechaFin
+  };
+}));
+
+        } else if (currentUser.idUser) {
+          const response = await getTrabajosByUser(currentUser.idUser);
+          const asignaciones = response?.data?.asignaciones || [];
+          
+          const trabajosAsignados = asignaciones.map(asignacion => ({
+            ...(asignacion.trabajo || {}),
+            fechaInicio: asignacion.fechaInicio,
+            fechaFin: asignacion.fechaFin,
+            asignacionId: asignacion.id
+          })).filter(trabajo => trabajo.id);
+          
+          setTrabajos(trabajosAsignados);
+        }
       } catch (error) {
         console.error("Error al obtener los trabajos", error);
       }
     };
     fetchTrabajos();
-  }, []);
+  }, [currentUser]);
 
   // Convertir trabajos a eventos para el calendario
   const eventos = trabajos.map(trabajo => ({
     id: trabajo.id,
-    title: `${trabajo.nombre} - ${trabajo.area}`,
+    title: `${trabajo.nombre || 'Sin nombre'} - ${trabajo.area || 'Sin área'}`,
     start: new Date(trabajo.fechaInicio),
     end: new Date(trabajo.fechaFin),
     estado: trabajo.estado,
     descripcion: trabajo.descripcion,
-    encargadoId: trabajo.encargadoId
+    prioridad: trabajo.prioridad,
+    asignacionId: trabajo.asignacionId,
+    observaciones: trabajo.observaciones
   }));
 
   // Estilos personalizados según el estado
@@ -41,18 +72,26 @@ const CalendarioMantenimientos = () => {
     let backgroundColor = '';
     let borderColor = '';
     
-    if (event.estado === 'Pendiente') {
-      backgroundColor = '#ffd700'; // Amarillo para pendientes
-      borderColor = '#e6c200';
-    } else if (event.estado === 'En progreso') {
-      backgroundColor = '#4682b4'; // Azul para en progreso
-      borderColor = '#3a6d99';
-    } else if (event.estado === 'Completado') {
-      backgroundColor = '#32cd32'; // Verde para completados
-      borderColor = '#2db82d';
-    } else if (event.estado === 'Cancelado') {
-      backgroundColor = '#ff4500'; // Rojo para cancelados
-      borderColor = '#e03e00';
+    switch(event.estado) {
+      case 'Pendiente':
+        backgroundColor = '#FFC107'; // Amarillo
+        borderColor = '#E0A800';
+        break;
+      case 'En Progreso':
+        backgroundColor = '#2196F3'; // Azul
+        borderColor = '#0B7DDA';
+        break;
+      case 'Finalizado':
+        backgroundColor = '#4CAF50'; // Verde
+        borderColor = '#3D8B40';
+        break;
+      case 'Rechazado':
+        backgroundColor = '#F44336'; // Rojo
+        borderColor = '#D32F2F';
+        break;
+      default:
+        backgroundColor = '#9E9E9E'; // Gris
+        borderColor = '#757575';
     }
     
     return {
@@ -79,23 +118,50 @@ const CalendarioMantenimientos = () => {
     <div className="calendar-container">
       <h2>Calendario de Mantenimientos</h2>
       
+      <div className="user-info">
+        <p>
+          {currentUser.roles[0] === 'Administrador'
+            ? 'Vista de administrador: Todos los trabajos'
+            : `Tus trabajos asignados: ${currentUser.full_name || `Usuario #${currentUser.idUser}`}`}
+        </p>
+        <img
+          src={currentUser.photo || '/default-avatar.png'}
+          alt="Avatar"
+          className="user-avatar"
+          style={{
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            objectFit: 'cover'
+          }}
+        />
+        <p>Total trabajos: {trabajos.length}</p>
+      </div>
+      
       <div className="calendar-legend">
-        <div className="legend-item">
-          <span className="legend-color" style={{backgroundColor: '#ffd700'}}></span>
-          <span>Pendiente</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{backgroundColor: '#4682b4'}}></span>
-          <span>En progreso</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{backgroundColor: '#32cd32'}}></span>
-          <span>Completado</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color" style={{backgroundColor: '#ff4500'}}></span>
-          <span>Cancelado</span>
-        </div>
+        {currentUser.roles[0] === 'Administrador' ? (
+          <>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#FFC107'}}></span>
+              <span>Pendiente</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#F44336'}}></span>
+              <span>Rechazado</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#2196F3'}}></span>
+              <span>En Progreso</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#4CAF50'}}></span>
+              <span>Finalizado</span>
+            </div>
+          </>
+        )}
       </div>
 
       <div style={{ height: '700px', marginTop: '20px' }}>
@@ -130,9 +196,13 @@ const CalendarioMantenimientos = () => {
             <h2>{selectedEvent.title}</h2>
             <div className="event-details">
               <p><strong>Estado:</strong> {selectedEvent.estado}</p>
+              <p><strong>Prioridad:</strong> {selectedEvent.prioridad || 'No especificada'}</p>
               <p><strong>Inicio:</strong> {moment(selectedEvent.start).format('LLL')}</p>
               <p><strong>Fin:</strong> {moment(selectedEvent.end).format('LLL')}</p>
-              <p><strong>Descripción:</strong> {selectedEvent.descripcion}</p>
+              <p><strong>Descripción:</strong> {selectedEvent.descripcion || 'Sin descripción'}</p>
+              {selectedEvent.observaciones && (
+                <p><strong>Observaciones:</strong> {selectedEvent.observaciones}</p>
+              )}
             </div>
           </div>
         </div>

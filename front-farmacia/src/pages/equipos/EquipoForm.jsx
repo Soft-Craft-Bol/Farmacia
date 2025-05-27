@@ -22,6 +22,7 @@ const EquipoForm = () => {
     proveedor: '',
     numeroOrden: '',
     usuarioId: '',
+    periodoMantenimiento: 180,
   });
 
   const [files, setFiles] = useState([]);
@@ -78,6 +79,7 @@ const EquipoForm = () => {
             proveedor: data.proveedor || '',
             numeroOrden: data.numeroOrden || '',
             usuarioId: data.usuarioId || '',
+            periodoMantenimiento: data.periodoMantenimiento || 180,
           });
 
           if (data.imagenes && data.imagenes.length > 0) {
@@ -225,6 +227,10 @@ const EquipoForm = () => {
     proveedor: Yup.string().required('Campo requerido'),
     numeroOrden: Yup.string().required('Campo requerido'),
     usuarioId: Yup.string().required('Selecciona un usuario'),
+    periodoMantenimiento: Yup.number()
+      .required('Campo requerido')
+      .min(30, 'Mínimo 30 días')
+      .max(365, 'Máximo 1 año'),
   });
 
   const getFileIcon = (fileType) => {
@@ -247,7 +253,6 @@ const EquipoForm = () => {
       >
         {({ isSubmitting, setFieldValue, values }) => (
           <Form className="equipo-form">
-            {/* Sección de imágenes */}
             <div className="image-upload-section">
               <h3>Imágenes del Equipo (Máximo 4)</h3>
               <div className="image-preview-container">
@@ -255,15 +260,12 @@ const EquipoForm = () => {
                   // Determinar la fuente de la imagen
                   let imageSrc;
 
-                  if (file.url) {
+                  if (file.isExisting) {
                     // Imagen existente del servidor
                     imageSrc = file.url.startsWith('http') ? file.url : `http://localhost:4000${file.url}`;
-                  } else if (file.file) {
+                  } else {
                     // Nueva imagen subida (File object)
                     imageSrc = URL.createObjectURL(file.file);
-                  } else {
-                    // Caso por defecto (no debería ocurrir)
-                    imageSrc = '';
                   }
 
                   return (
@@ -272,12 +274,6 @@ const EquipoForm = () => {
                         src={imageSrc}
                         alt={`Vista previa ${index + 1}`}
                         className="image-preview"
-                        onLoad={() => {
-                          // Limpiar URLs creadas con createObjectURL cuando ya no se necesiten
-                          if (!file.url && file.file) {
-                            URL.revokeObjectURL(imageSrc);
-                          }
-                        }}
                       />
                       <button
                         type="button"
@@ -375,6 +371,12 @@ const EquipoForm = () => {
                     </option>
                   ))}
                 </Select>
+                <InputText
+                  label="Período de Mantenimiento (días)"
+                  name="periodoMantenimiento"
+                  type="number"
+                  required
+                />
               </div>
             </div>
 
@@ -390,7 +392,7 @@ const EquipoForm = () => {
             <ul className="component-list">
               {preguntas.map((pregunta, index) => (
                 <li key={index} className="component-item">
-                  {pregunta}
+                  {typeof pregunta === 'object' ? pregunta.nombre : pregunta}
                 </li>
               ))}
             </ul>

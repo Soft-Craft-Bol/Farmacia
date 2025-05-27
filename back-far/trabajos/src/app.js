@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const trabajosRoutes = require('./routes/trabajos.routes')
+const trabajosTecnicoRoutes = require('./routes/trabajoTecnico.routes');
 require('dotenv').config();
 
 const app = express();
@@ -17,5 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/trabajos', trabajosRoutes);
+app.use('/trabajos-tecnico', trabajosTecnicoRoutes);
 
 module.exports = app;

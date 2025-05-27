@@ -13,12 +13,10 @@ const ESTADOS_VALIDOS = [
 ];
 
 exports.createTrabajo = async (req, res) => {
-  console.log("Creando trabajo...");
   try {
     const { nombre, descripcion, fechaInicio, equipoId, area } = req.body;
     const encargadoId = req.body.encargadoId;
     const tipoEquipo = req.body.tipoEquipo || null; 
-    console.log("Tipo de equipo:", tipoEquipo);
 
     const estado = req.body.estado || 'Pendiente';
     if (!ESTADOS_VALIDOS.includes(estado)) {
@@ -55,8 +53,6 @@ exports.createTrabajo = async (req, res) => {
       }
       
     });
-
-    console.log("Trabajo creado:", nuevoTrabajo);
 
     return res.status(201).json({
       message: 'Trabajo creado con éxito',
@@ -248,76 +244,165 @@ exports.updateEstadoTrabajo = async (req, res) => {
   }
 };
 
-// estados de trabajo 
 exports.aceptarTrabajo = async (req, res) => {
+  console.log("Aceptando trabajo...");
+  console.log("Datos recibidos:", req.body);
   const { trabajoId } = req.params;
-  const { tecnicoId, fechaInicio, fechaFin, descripcion } = req.body;
+  const { tecnicoId, encargadoId, fechaInicio, fechaFin, descripcion } = req.body;
 
   try {
-    // Verificar que el trabajo existe y está pendiente
+    // 1. Verificar que el trabajo existe y está pendiente
     const trabajo = await prisma.trabajo.findUnique({
-      where: { id: Number(trabajoId) }
+      where: { id: Number(trabajoId) },
+      include: { 
+        asignaciones: true,
+        historial: {
+          orderBy: { fechaCambio: 'desc' },
+          take: 1
+        }
+      }
     });
 
     if (!trabajo) {
-      return res.status(404).json({ error: 'Trabajo no encontrado' });
+      return res.status(404).json({ 
+        error: 'Trabajo no encontrado',
+        details: `No existe un trabajo con ID ${trabajoId}`
+      });
     }
 
     if (trabajo.estado !== 'Pendiente') {
-      return res.status(400).json({ error: 'Solo se pueden aceptar trabajos pendientes' });
+      return res.status(400).json({ 
+        error: 'Estado inválido para aceptación',
+        details: `Solo se pueden aceptar trabajos en estado "Pendiente". Estado actual: ${trabajo.estado}`,
+        estadoActual: trabajo.estado
+      });
     }
 
-    // Crear la asignación del técnico
-    const asignacion = await prisma.trabajoAsignacion.create({
-      data: {
-        trabajoId: Number(trabajoId),
+    // 2. Verificar si ya existe una asignación para este trabajo y técnico
+    const asignacionExistente = trabajo.asignaciones.find(a => a.tecnicoId === Number(tecnicoId));
+    
+    if (asignacionExistente) {
+      return res.status(400).json({ 
+        error: 'Asignación duplicada',
+        details: 'Este técnico ya está asignado a este trabajo',
+        asignacionExistente
+      });
+    }
+
+    // 3. Verificar conflictos de horario para el técnico
+    const asignacionesTecnico = await prisma.trabajoAsignacion.findMany({
+      where: { 
         tecnicoId: Number(tecnicoId),
-        fechaInicio: new Date(fechaInicio),
-        fechaFin: fechaFin ? new Date(fechaFin) : null,
-        observaciones: descripcion || ''
+        NOT: { trabajoId: Number(trabajoId) } // Excluir el trabajo actual
       }
     });
 
-    // Actualizar el estado del trabajo a "Aceptado"
-    const trabajoActualizado = await prisma.trabajo.update({
-      where: { id: Number(trabajoId) },
-      data: { 
-        estado: 'Aceptado',
-        encargadoId: Number(tecnicoId),
-        fechaInicio: new Date(fechaInicio),
-        fechaFin: fechaFin ? new Date(fechaFin) : null
-      },
-      include: {
-        asignaciones: true
-      }
+    const fechaInicioTrabajo = new Date(fechaInicio);
+    const fechaFinTrabajo = fechaFin ? new Date(fechaFin) : null;
+
+    const conflicto = asignacionesTecnico.some(asignacion => {
+      const inicioExistente = new Date(asignacion.fechaInicio);
+      const finExistente = asignacion.fechaFin ? new Date(asignacion.fechaFin) : null;
+      
+      return (
+        (fechaInicioTrabajo < (finExistente || new Date('9999-12-31'))) && 
+        ((fechaFinTrabajo || new Date('9999-12-31'))) > inicioExistente
+      );
     });
 
-    // Registrar en el historial
-    await prisma.historialTrabajo.create({
-      data: {
-        trabajoId: Number(trabajoId),
-        estado: 'Aceptado',
-        usuarioId: req.user.id, // Asume que tienes el usuario en el request
-        comentario: `Trabajo aceptado y asignado al técnico ID: ${tecnicoId}`
-      }
-    });
+    if (conflicto) {
+      return res.status(400).json({
+        error: 'Conflicto de horario',
+        details: 'El técnico ya tiene trabajos asignados en ese horario',
+        periodosOcupados: asignacionesTecnico.map(a => ({
+          trabajoId: a.trabajoId,
+          fechaInicio: a.fechaInicio,
+          fechaFin: a.fechaFin
+        }))
+      });
+    }
+
+    // 4. Usar transacción para asegurar consistencia
+    const [trabajoActualizado, asignacion] = await prisma.$transaction([
+      // Actualizar el estado del trabajo directamente a "En Progreso"
+      prisma.trabajo.update({
+        where: { id: Number(trabajoId) },
+        data: { 
+          estado: 'En Progreso',
+          encargadoId: Number(encargadoId),
+          fechaInicio: fechaInicioTrabajo,
+          fechaFin: fechaFinTrabajo
+        }
+      }),
+      
+      // Crear la asignación del técnico
+      prisma.trabajoAsignacion.create({
+        data: {
+          trabajoId: Number(trabajoId),
+          tecnicoId: Number(tecnicoId),
+          fechaInicio: fechaInicioTrabajo,
+          fechaFin: fechaFinTrabajo,
+          observaciones: descripcion || 'Trabajo aceptado y puesto en progreso',
+          tecnicoNombre: '', // Deberías obtener este dato de tu DB o del request
+          fechaAsignacion: new Date()
+        }
+      })
+    ]);
+
+    // 5. Registrar en el historial (dos registros: Aceptado y En Progreso)
+    await prisma.$transaction([
+      // Registro de aceptación (usando el valor exacto del enum)
+      prisma.historialTrabajo.create({
+        data: {
+          trabajoId: Number(trabajoId),
+          estado: 'Aceptado', // Asegúrate que coincida exactamente con el enum
+          usuarioId: Number(encargadoId),
+          usuarioNombre: 'Sistema',
+          comentario: `Trabajo aceptado y asignado al técnico ID: ${tecnicoId}`
+        }
+      }),
+      // Registro de cambio a En Progreso (usando el valor exacto del enum)
+      prisma.historialTrabajo.create({
+        data: {
+          trabajoId: Number(trabajoId),
+          estado: 'EnProgreso', // Asegúrate que coincida exactamente con el enum
+          usuarioId: Number(encargadoId),
+          usuarioNombre: 'Sistema',
+          comentario: 'Trabajo puesto en progreso automáticamente al ser aceptado'
+        }
+      })
+    ]);
 
     return res.status(200).json({
-      message: 'Trabajo aceptado y asignado correctamente',
+      message: 'Trabajo aceptado y puesto en progreso correctamente',
       data: {
         trabajo: trabajoActualizado,
-        asignacion
+        asignacion,
+        historial: {
+          aceptado: true,
+          enProgreso: true
+        }
       }
     });
 
   } catch (error) {
     console.error("Error al aceptar trabajo:", error);
+    
+    let errorMessage = 'Error al aceptar el trabajo';
+    if (error.code === 'P2002') {
+      errorMessage = 'Error de duplicado en la asignación';
+    } else if (error.code === 'P2025') {
+      errorMessage = 'El trabajo no existe o fue eliminado';
+    }
+
     return res.status(500).json({ 
-      error: 'Error al aceptar el trabajo',
-      details: error.message 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
+
 
 // Controlador para cambiar a "En Progreso"
 exports.iniciarTrabajo = async (req, res) => {
@@ -430,7 +515,6 @@ exports.cancelarTrabajo = async (req, res) => {
   }
 
   try {
-    // Verificar que el trabajo existe y no está finalizado/cancelado
     const trabajo = await prisma.trabajo.findUnique({
       where: { id: Number(trabajoId) }
     });
@@ -445,7 +529,6 @@ exports.cancelarTrabajo = async (req, res) => {
       });
     }
 
-    // Actualizar estado
     const trabajoActualizado = await prisma.trabajo.update({
       where: { id: Number(trabajoId) },
       data: { estado: 'Cancelado' }
@@ -475,57 +558,86 @@ exports.cancelarTrabajo = async (req, res) => {
   }
 };
 
-// Controlador para rechazar un trabajo
+// Controlador para rechazar un trabajo - Versión corregida
 exports.rechazarTrabajo = async (req, res) => {
   const { trabajoId } = req.params;
   const { motivo } = req.body;
 
   if (!motivo) {
-    return res.status(400).json({ error: 'Se requiere un motivo para rechazar el trabajo' });
+    return res.status(400).json({ 
+      error: 'Se requiere un motivo para rechazar el trabajo',
+      details: 'El campo "motivo" es obligatorio'
+    });
   }
 
   try {
-    // Verificar que el trabajo existe y está pendiente
+    // 1. Verificar que el trabajo existe y está pendiente
     const trabajo = await prisma.trabajo.findUnique({
       where: { id: Number(trabajoId) }
     });
 
     if (!trabajo) {
-      return res.status(404).json({ error: 'Trabajo no encontrado' });
+      return res.status(404).json({ 
+        error: 'Trabajo no encontrado',
+        details: `No existe un trabajo con ID ${trabajoId}`
+      });
     }
 
     if (trabajo.estado !== 'Pendiente') {
       return res.status(400).json({ 
-        error: 'Solo se pueden rechazar trabajos en estado "Pendiente"' 
+        error: 'Estado inválido para rechazo',
+        details: `Solo se pueden rechazar trabajos en estado "Pendiente". Estado actual: ${trabajo.estado}`,
+        estadosValidos: ['Pendiente']
       });
     }
 
-    // Actualizar estado
+    // 2. Actualizar el estado del trabajo a "Rechazado"
     const trabajoActualizado = await prisma.trabajo.update({
       where: { id: Number(trabajoId) },
-      data: { estado: 'Rechazado' }
-    });
-
-    // Registrar en el historial
-    await prisma.historialTrabajo.create({
-      data: {
-        trabajoId: Number(trabajoId),
+      data: { 
         estado: 'Rechazado',
-        usuarioId: req.user.id,
-        comentario: motivo
+        // Agregar motivo al trabajo si es necesario
+        descripcion: motivo
       }
     });
 
+    // 3. Registrar en el historial (con verificación de usuario)
+    if (req.user && req.user.id) {
+      await prisma.historialTrabajo.create({
+        data: {
+          trabajoId: Number(trabajoId),
+          estado: 'Rechazado',
+          usuarioId: req.user.id,
+          usuarioNombre: req.user.nombre || 'Sistema',
+          comentario: motivo
+        }
+      });
+    }
+
     return res.status(200).json({
+      success: true,
       message: 'Trabajo rechazado correctamente',
-      data: trabajoActualizado
+      data: {
+        trabajo: trabajoActualizado,
+        motivo: motivo
+      }
     });
 
   } catch (error) {
-    console.error("Error al rechazar trabajo:", error);
+    console.error("Error detallado al rechazar trabajo:", error);
+    
+    // Mensaje más descriptivo para el cliente
+    let errorMessage = 'Error al rechazar el trabajo';
+    if (error.code === 'P2002') {
+      errorMessage = 'Error de duplicado en el historial';
+    } else if (error.code === 'P2025') {
+      errorMessage = 'El trabajo no existe o fue eliminado';
+    }
+
     return res.status(500).json({ 
-      error: 'Error al rechazar el trabajo',
-      details: error.message 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
