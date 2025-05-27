@@ -136,6 +136,7 @@ const registrarEquipo = async (req, res) => {
         proveedor,
         numeroOrden,
         ...archivosData,
+        tipoEquipo: req.body.tipoEquipo || 'Otro',
         userId: parseInt(usuarioId),
         componentes: {
           create: componentesArray.map(componente => ({
@@ -389,6 +390,17 @@ const getEquiposByUserId = async (req, res) => {
     }
 };
 
+const contarEquipos = async (req, res) => {
+  try {
+    const TotalEquipos = await prisma.equipo.count();
+    res.json({ total: TotalEquipos });
+  } catch (error) {
+    console.error("Error al contar equipos:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+
 
 module.exports = {
   uploadMiddleware, 
@@ -397,6 +409,7 @@ module.exports = {
   eliminarEquipo,
   obtenerEquipoPorId,
   actualizarEquipo,
-  getEquiposByUserId
+  getEquiposByUserId,
+  contarEquipos
 };
 

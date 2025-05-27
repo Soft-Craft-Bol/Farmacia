@@ -1,6 +1,50 @@
 const prisma = require('../config/prisma');
 const { calcularProximoMantenimiento, calcularDiasRestantes } = require('../utils/dateUtils');
 
+
+const registrarMantenimiento = async (req, res) => {
+    try {
+        const {
+            equipoId,
+            fechaInicio,
+            fechaFin,
+            tipo,
+            descripcion,
+            horasUso,
+            tecnicoId,
+            tecnicoNombre
+        } = req.body;
+
+        const nuevoHistorial = await prisma.historialMantenimiento.create({
+            data: {
+                equipoId,
+                fechaInicio: new Date(fechaInicio),
+                fechaFin: new Date(fechaFin),
+                tipo,
+                descripcion,
+                horasUso,
+                tecnicoId,
+                tecnicoNombre,
+            },
+        });
+
+        // Actualizar equipo
+        await prisma.equipo.update({
+            where: { id: equipoId },
+            data: {
+                ultimoMantenimiento: new Date(fechaFin),
+                horasUsoAcumuladas: horasUso,
+            },
+        });
+
+        res.status(201).json({ message: 'Mantenimiento registrado correctamente', historial: nuevoHistorial });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al registrar mantenimiento' });
+    }
+};
+
+
 const obtenerEquiposConMantenimiento = async (req, res) => {
     try {
         // Obtener solo los campos necesarios para el cronograma
@@ -134,59 +178,6 @@ const actualizarMantenimiento = async (req, res) => {
         console.error("Error al actualizar mantenimiento:", error);
         res.status(500).json({
             error: "Error al actualizar mantenimiento",
-            detalles: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
-};
-
-// Función para registrar un mantenimiento
-const registrarMantenimiento = async (req, res) => {
-    try {
-        const { equipoId, fechaInicio, fechaFin, tipo, descripcion, horasUso, tecnicoId, tecnicoNombre } = req.body;
-
-        // Validaciones básicas
-        if (!equipoId || !fechaInicio || !fechaFin || !tipo) {
-            return res.status(400).json({ error: "Faltan campos obligatorios" });
-        }
-
-        // Registrar el mantenimiento
-        const mantenimiento = await prisma.historialMantenimiento.create({
-            data: {
-                equipoId: parseInt(equipoId),
-                fechaInicio: new Date(fechaInicio),
-                fechaFin: new Date(fechaFin),
-                tipo,
-                descripcion,
-                horasUso: parseInt(horasUso) || 0,
-                tecnicoId: parseInt(tecnicoId),
-                tecnicoNombre
-            }
-        });
-
-        // Actualizar el equipo con las horas acumuladas y próximo mantenimiento
-        const equipo = await prisma.equipo.update({
-            where: { id: parseInt(equipoId) },
-            data: {
-                horasUsoAcumuladas: { increment: parseInt(horasUso) || 0 },
-                ultimoMantenimiento: new Date(fechaFin),
-                // El próximo mantenimiento se recalculará automáticamente en el próximo acceso
-            },
-            include: {
-                historialMantenimientos: {
-                    orderBy: { fechaFin: 'desc' },
-                    take: 1
-                }
-            }
-        });
-
-        res.status(201).json({
-            mantenimiento,
-            equipo
-        });
-    } catch (error) {
-        console.error("Error al registrar mantenimiento:", error);
-        res.status(500).json({
-            error: "Error al registrar mantenimiento",
             detalles: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }

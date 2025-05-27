@@ -108,7 +108,7 @@ const asignarTrabajosMasivos = async (req, res) => {
 
 
 const finalizarTrabajoTecnico = async (req, res) => {
-    console.log("finalizarTrabajoTecnico called with params:", req.params);
+  console.log("finalizarTrabajoTecnico called with params:", req.params);
   const { trabajoId, tecnicoId } = req.params;
   const { 
     observaciones, 
@@ -185,8 +185,8 @@ const finalizarTrabajoTecnico = async (req, res) => {
       imagenes: imagenes.length > 0 ? JSON.stringify(imagenes) : null
     };
     
-    // 5. Actualizar en transacción
-    const [trabajoActualizado, asignacionActualizada, reporteFinalizacion] = await prisma.$transaction([
+    // 5. Actualizar en transacción (sin el reporte de finalización)
+    const [trabajoActualizado, asignacionActualizada] = await prisma.$transaction([
       // Actualizar estado del trabajo
       prisma.trabajo.update({
         where: { id: Number(trabajoId) },
@@ -196,26 +196,18 @@ const finalizarTrabajoTecnico = async (req, res) => {
         }
       }),
       
-      // Actualizar asignación
+      // Actualizar asignación con más detalles
       prisma.trabajoAsignacion.update({
         where: { id: asignacion.id },
         data: { 
           fechaFin: new Date(),
-          observaciones: datosFinalizacion.observaciones
-        }
-      }),
-      
-      // Crear reporte de finalización
-      prisma.reporteFinalizacion.create({
-        data: {
-          trabajoId: Number(trabajoId),
-          tecnicoId: Number(tecnicoId),
-          ...datosFinalizacion
+          observaciones: datosFinalizacion.observaciones,
+          // Puedes agregar más campos aquí si necesitas
         }
       })
     ]);
     
-    // 6. Registrar en historial
+    // 6. Registrar en historial con toda la información
     await prisma.historialTrabajo.create({
       data: {
         trabajoId: Number(trabajoId),
@@ -224,6 +216,10 @@ const finalizarTrabajoTecnico = async (req, res) => {
         usuarioNombre: 'Técnico',
         comentario: observaciones || 'Trabajo finalizado por el técnico',
         metadata: JSON.stringify({
+          solucionAplicada,
+          materialesUtilizados,
+          horasTrabajadas,
+          recomendaciones,
           documentos: documentos.map(d => d.url),
           imagenes: imagenes.map(i => i.url)
         })
@@ -235,7 +231,6 @@ const finalizarTrabajoTecnico = async (req, res) => {
       data: {
         trabajo: trabajoActualizado,
         asignacion: asignacionActualizada,
-        reporte: reporteFinalizacion,
         documentos: documentos,
         imagenes: imagenes
       }
@@ -260,7 +255,6 @@ const finalizarTrabajoTecnico = async (req, res) => {
     });
   }
 };
-
 
 const getCargaTecnico = async (req, res) => {
   const { tecnicoId } = req.params;
@@ -316,7 +310,7 @@ const getTrabajosEnProgresoYRechazados = async (req, res) => {
     const trabajos = await prisma.trabajo.findMany({
       where: {
         estado: {
-          in: ['Pendiente', 'Rechazado']
+          in: ['Pendiente', 'En Progreso', 'Finalizado']
         }
       },
       include: {
@@ -331,9 +325,7 @@ const getTrabajosEnProgresoYRechazados = async (req, res) => {
             fechaCambio: 'desc'
           }
         },
-        reportes: {
-          take: 1 // Solo el último reporte si existe
-        }
+        
       },
       orderBy: {
         prioridad: 'desc' // Ordenar por prioridad (Urgente primero)
@@ -354,7 +346,6 @@ const getTrabajosEnProgresoYRechazados = async (req, res) => {
       },
       asignaciones: trabajo.asignaciones,
       ultimoHistorial: trabajo.historial[0] || null,
-      ultimoReporte: trabajo.reportes[0] || null
     }));
 
     res.status(200).json({
@@ -376,10 +367,55 @@ const getTrabajosEnProgresoYRechazados = async (req, res) => {
 };
 
 
+const getTrabajosFinalizadosConHistorial = async (req, res) => {
+  try {
+    // 1. Buscar los historiales con estado 'Finalizado'
+    const historialesFinalizados = await prisma.historialTrabajo.findMany({
+      where: {
+        estado: 'Finalizado'
+      },
+      select: {
+        trabajoId: true
+      },
+      distinct: ['trabajoId']
+    });
+
+    const trabajoIdsFinalizados = historialesFinalizados.map(h => h.trabajoId);
+
+    // 2. Traer los trabajos finalizados con sus historiales
+    const trabajos = await prisma.trabajo.findMany({
+      where: {
+        id: { in: trabajoIdsFinalizados }
+      },
+      include: {
+        historial: {
+          orderBy: {
+            fechaCambio: 'asc'
+          }
+        },
+        asignaciones: true
+      }
+    });
+
+    return res.status(200).json({
+      total: trabajos.length,
+      trabajos
+    });
+
+  } catch (error) {
+    console.error("Error al obtener trabajos finalizados:", error);
+    return res.status(500).json({
+      error: 'Error al obtener trabajos finalizados',
+      details: error.message
+    });
+  }
+};
+
 
 module.exports = {
     asignarTrabajosMasivos,
     finalizarTrabajoTecnico,
     getCargaTecnico,
-    getTrabajosEnProgresoYRechazados
-    };
+    getTrabajosEnProgresoYRechazados,
+getTrabajosFinalizadosConHistorial    
+};

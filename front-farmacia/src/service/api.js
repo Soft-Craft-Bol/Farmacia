@@ -51,6 +51,11 @@ export const addUser = (data) => apiUsers.post('/auth/register', data);
 export const updateUser = (id, data) => apiUsers.put(`/users/${id}`, data);
 export const getUserById = (id) => apiUsers.get(`/users/${id}`);
 export const getEquiposByUserId = (userId) => apiUsers.get(`/users/equipos/${userId}`);
+export const countUsers = () => apiUsers.get('/users/count');
+export const contarTrabajos = () => apiTrabajos.get('/trabajos/contar');
+export const contarEquipos = () => apiEquipos.get('/equipos/contar');
+export const contarTrabajosPendientes = () => apiTrabajos.get('/trabajos/contar/pendientes');
+export const contarTrabajosPorEstado = () => apiTrabajos.get('/trabajos/contar/estado');
 // export const getUserProfile = () => apiUsers.get('/auth/profile');
 export const getUserProfile = async () => {
   try {
@@ -115,5 +120,10 @@ export const updateEstadoTrabajo = (trabajoId, estado) =>
 
 export const getTrabajosByEstado = (estado) => 
   apiTrabajos.get(`/trabajos?estado=${estado}`);
+export const getHistorialFinalizados = () => 
+  apiTrabajos.get('/trabajos-tecnico/historial');
+
+export const registrarHistorial = (data) =>
+  apiEquipos.post('/mantenimiento/registrar', data);
 
 

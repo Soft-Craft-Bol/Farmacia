@@ -9,7 +9,8 @@ import Select from "../../components/select/Select";
 import { getUser } from "../login/authFuntions";
 
 const TrabajoForm = () => {
-  const [equipos, setEquipos] = useState([]);
+   const [allEquipos, setAllEquipos] = useState([]); // Guardamos todos los equipos aquí
+  const [filteredEquipos, setFilteredEquipos] = useState([]); // Equipos filtrados por tipo
   const [areaEquipo, setAreaEquipo] = useState("");
   const user = getUser();
 
@@ -17,7 +18,8 @@ const TrabajoForm = () => {
     const fetchUserEquipos = async () => {
       try {
         const response = await getEquiposByUserId(user.idUser);
-        setEquipos(response.data.equipos || []); // Asegúrate de acceder a response.data.equipos
+        console.log("Equipos obtenidos:", response.data.equipos);
+        setAllEquipos(response.data.equipos || []);
       } catch (error) {
         console.error("Error fetching equipos:", error);
       }
@@ -25,18 +27,27 @@ const TrabajoForm = () => {
     fetchUserEquipos();
   }, [user.idUser]);
 
+    const filterEquiposByType = (tipo) => {
+    if (!tipo) {
+      setFilteredEquipos([]);
+      return;
+    }
+    const filtered = allEquipos.filter(equipo => equipo.tipoEquipo === tipo);
+    setFilteredEquipos(filtered);
+  };
+
   const validationSchema = Yup.object({
     nombre: Yup.string().required("El nombre es obligatorio"),
     descripcion: Yup.string(),
     fechaInicio: Yup.date().required("La fecha de inicio es obligatoria"),
     equipoId: Yup.string().required("El equipo es obligatorio"),
     imagen: Yup.mixed().required("La imagen es obligatoria").nullable(),
+    tipoEquipo: Yup.string().required("El tipo de equipo es obligatorio"),
   });
-
   return (
     <div className="trabajo-form-container">
       <div className="form-header">
-        <h2 className="form-title">Solicitar Nuevo Trabajo</h2>
+        <h2 className="form-title">Solicitar Mantenimiento</h2>
         <p className="form-subtitle">Complete todos los campos requeridos</p>
       </div>
 
@@ -94,42 +105,48 @@ const TrabajoForm = () => {
                 />
                 
                 <Select
-                  label="Equipo"
-                  name="equipoId"
-                  required
-                  onChange={(e) => {
-                    const equipoId = e.target.value;
-                    setFieldValue("equipoId", equipoId);
-                    
-                    // Buscamos el equipo seleccionado para obtener su área (ubicación)
-                    const equipoSeleccionado = equipos.find(e => e.id.toString() === equipoId);
-                    setAreaEquipo(equipoSeleccionado?.ubicacion || "");
-                  }}
-                >
-                  <option value="">Seleccione un equipo</option>
-                  {equipos.map((equipo) => (
-                    <option key={equipo.id} value={equipo.id}>
-                      {equipo.etiquetaActivo}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              
-              {/* Columna derecha */}
-              <div className="form-column">
-              <Select
                   label="Tipo de Equipo"
                   name="tipoEquipo"
                   required
                   onChange={(e) => {
                     const tipo = e.target.value;
                     setFieldValue("tipoEquipo", tipo);
+                    setFieldValue("equipoId", ""); // Resetear el equipo seleccionado
+                    setAreaEquipo(""); // Resetear el área
+                    filterEquiposByType(tipo); // Filtrar equipos
                   }}
-                  >
+                >
                   <option value="">Seleccione un tipo de equipo</option>
-                  <option value="Informatico">Informatico</option>
-                  <option value="Biomedico">Biomedico</option>
-                  </Select>
+                  <option value="Informatico">Informático</option>
+                  <option value="Biomedico">Biomédico</option>
+                </Select>
+              </div>
+              
+              {/* Columna derecha */}
+              <div className="form-column">
+              
+
+                <Select
+                  label="Equipo"
+                  name="equipoId"
+                  required
+                  disabled={!values.tipoEquipo} // Deshabilitar si no hay tipo seleccionado
+                  onChange={(e) => {
+                    const equipoId = e.target.value;
+                    setFieldValue("equipoId", equipoId);
+                    
+                    // Buscamos el equipo seleccionado para obtener su área (ubicación)
+                    const equipoSeleccionado = filteredEquipos.find(e => e.id.toString() === equipoId);
+                    setAreaEquipo(equipoSeleccionado?.ubicacion || "");
+                  }}
+                >
+                  <option value="">Seleccione un equipo</option>
+                  {filteredEquipos.map((equipo) => (
+                    <option key={equipo.id} value={equipo.id}>
+                      {equipo.etiquetaActivo}
+                    </option>
+                  ))}
+                </Select>
 
                 <InputText 
                   label="Descripción" 

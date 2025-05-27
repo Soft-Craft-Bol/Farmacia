@@ -28,12 +28,6 @@ const TaskBoardtask = () => {
       title: "Finalizado",
       taskIds: [],
       color: "#4CAF50"
-    },
-    rechazado: {
-      id: "rechazado",
-      title: "Rechazado",
-      taskIds: [],
-      color: "#F44336"
     }
   });
 
@@ -200,7 +194,7 @@ const TaskBoardtask = () => {
       <h1>Tablero de seguimiento</h1>
       <span className="kanban-subtitle">
         {currentUser.roles[0] === 'Administrador'
-          ? 'Vista de administrador: Pendientes y Rechazados'
+          ? 'Vista de administrador: Pendientes'
           : 'Arrastra y suelta para cambiar el estado de tus trabajos'}
       </span>
 
@@ -231,7 +225,7 @@ const TaskBoardtask = () => {
           {Object.values(columns)
             .filter(column => {
               if (currentUser.roles[0] === 'Administrador') {
-                return ['pendiente', 'rechazado'].includes(column.id);
+                return ['pendiente', 'en_progreso', 'finalizado'].includes(column.id);
               }
               return ['en_progreso', 'finalizado'].includes(column.id);
             })

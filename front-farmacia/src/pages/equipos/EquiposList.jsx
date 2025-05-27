@@ -84,6 +84,7 @@ const EquiposList = () => {
       equipo.estado,
       equipo.ubicacion,
       equipo.tipoMantenimiento,
+      equipo.tipoEquipo, 
       new Date(equipo.fechaCompra).toLocaleDateString(),
     ]);
 

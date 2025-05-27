@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
-import { finalizarTrabajo } from "../../service/api";
+import { finalizarTrabajo, registrarHistorial } from "../../service/api";
 import "./FinalizarTrabajoForm.css";
 
 const FinalizarTrabajoForm = ({ trabajoId, tecnicoId, onSuccess, onError }) => {

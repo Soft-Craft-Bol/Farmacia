@@ -7,6 +7,7 @@ router.post(
   '/', equipoController.uploadMiddleware, equipoController.registrarEquipo
 );
 router.get('/', equipoController.obtenerEquipos);
+router.get('/contar', equipoController.contarEquipos);
 router.delete('/:id', equipoController.eliminarEquipo);
 router.get('/:id', equipoController.obtenerEquipoPorId);
 router.get('/user/:userId', equipoController.getEquiposByUserId);

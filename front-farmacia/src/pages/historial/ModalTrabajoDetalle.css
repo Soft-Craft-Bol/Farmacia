@@ -1,0 +1,145 @@
+.modal-trabajo-detalle-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-trabajo-detalle-container {
+  background: #fff;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  padding: 25px 30px;
+  position: relative;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.modal-trabajo-detalle-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.modal-trabajo-detalle-close:hover {
+  color: #ff4d4d;
+}
+
+.modal-trabajo-detalle-container h2 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  font-weight: 700;
+  font-size: 28px;
+  color: #222;
+}
+
+.modal-trabajo-detalle-subtitle {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+.modal-trabajo-detalle-section {
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.modal-trabajo-detalle-section strong {
+  display: inline-block;
+  width: 140px;
+  font-weight: 600;
+  color: #444;
+  vertical-align: top;
+}
+
+.modal-trabajo-detalle-section p,
+.modal-trabajo-detalle-section div {
+  display: inline-block;
+  margin: 0;
+  max-width: calc(100% - 150px);
+  vertical-align: top;
+  color: #555;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.modal-trabajo-detalle-section ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 10px;
+  color: #444;
+}
+
+.modal-trabajo-detalle-section ul li {
+  margin-bottom: 15px;
+  background: #f9f9f9;
+  padding: 12px 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  font-size: 14px;
+}
+
+.modal-trabajo-detalle-section ul li a {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.modal-trabajo-detalle-section ul li a:hover {
+  color: #004999;
+}
+
+.modal-trabajo-detalle-section img {
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.modal-trabajo-detalle-section img:first-of-type {
+  max-width: 250px;
+  margin-top: 10px;
+}
+
+.modal-trabajo-detalle-section div > div {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modal-trabajo-detalle-section div > div img {
+  width: 90px;
+  height: 60px;
+  object-fit: cover;
+}
+
+@media (max-width: 600px) {
+  .modal-trabajo-detalle-section strong,
+  .modal-trabajo-detalle-section p,
+  .modal-trabajo-detalle-section div {
+    display: block;
+    width: 100%;
+  }
+  .modal-trabajo-detalle-section strong {
+    margin-bottom: 5px;
+  }
+}

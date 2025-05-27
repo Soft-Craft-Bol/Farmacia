@@ -23,6 +23,7 @@ const EquipoForm = () => {
     numeroOrden: '',
     usuarioId: '',
     periodoMantenimiento: 180,
+    tipoEquipo: '',
   });
 
   const [files, setFiles] = useState([]);
@@ -80,6 +81,7 @@ const EquipoForm = () => {
             numeroOrden: data.numeroOrden || '',
             usuarioId: data.usuarioId || '',
             periodoMantenimiento: data.periodoMantenimiento || 180,
+            tipoEquipo: data.tipoEquipo || '',
           });
 
           if (data.imagenes && data.imagenes.length > 0) {
@@ -231,6 +233,7 @@ const EquipoForm = () => {
       .required('Campo requerido')
       .min(30, 'Mínimo 30 días')
       .max(365, 'Máximo 1 año'),
+    tipoEquipo: Yup.string().required('Campo requerido'),
   });
 
   const getFileIcon = (fileType) => {
@@ -338,6 +341,17 @@ const EquipoForm = () => {
                     </option>
                   ))}
                 </Select>
+                <Select
+                  label="Tipo de Equipo"
+                  name="tipoEquipo"
+                  value={values.tipoEquipo}
+                  onChange={(e) => setFieldValue('tipoEquipo', e.target.value)}
+                  required
+                >
+                  <option value="">Selecciona un tipo</option>
+                  <option value="Informatico">Informatico</option>
+                  <option value="Biomedico">Biomedico</option>
+                  </Select>
               </div>
 
               <div className="form-column">

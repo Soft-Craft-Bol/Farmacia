@@ -1,0 +1,10 @@
+/* src/components/charts/PieChartComponent.css */
+.pie-chart-wrapper {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  background: var(--bg-component-white, #fff);
+  border-radius: 16px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+}

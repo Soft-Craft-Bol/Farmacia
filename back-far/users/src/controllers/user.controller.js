@@ -356,3 +356,14 @@ exports.getTecnicos = async (req, res) => {
         res.status(500).json({ error: "Error al obtener técnicos" });
     }
 };
+
+
+exports.contarUsuarios = async (req, res) => {
+  try {
+    const totalUsuarios = await prisma.user.count();
+    res.json({ total: totalUsuarios });
+  } catch (error) {
+    console.error("Error al contar usuarios:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
