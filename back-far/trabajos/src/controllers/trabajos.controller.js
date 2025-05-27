@@ -72,7 +72,7 @@ exports.createTrabajo = async (req, res) => {
 exports.getAllTrabajos = async (req, res) => {
   try {
     const trabajos = await prisma.trabajo.findMany({
-      include: { equipos: true },
+      orderBy: { fechaInicio: 'desc' },
     });
     return res.json(trabajos);
   } catch (error) {
@@ -89,7 +89,6 @@ exports.getTrabajoById = async (req, res) => {
   try {
     const trabajo = await prisma.trabajo.findUnique({
       where: { id: Number(trabajoId) },
-      include: { equipos: true },
     });
 
     if (!trabajo) {
@@ -641,3 +640,56 @@ exports.rechazarTrabajo = async (req, res) => {
     });
   }
 };
+
+exports.contarTrabajos = async (req, res) => {
+  try {
+    const totalTrabajos = await prisma.trabajo.count();
+    res.json({ total: totalTrabajos });
+  } catch (error) {
+    console.error("Error al contar trabajos:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+exports.contarTrabajosPendientes = async (req, res) => {
+  try {
+    const totalPendientes = await prisma.trabajo.count({
+      where: {
+        estado: "En Pendiente", // Asegúrate que sea igual al enum en tu modelo
+      },
+    });
+
+    res.json({ total: totalPendientes });
+  } catch (error) {
+    console.error("Error al contar trabajos pendientes:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+exports.contarTrabajosPorEstado = async (req, res) => {
+  try {
+    const estados = [
+      "Pendiente",
+      "Aceptado",
+      "EnProgreso",
+      "Rechazado",
+      "Finalizado",
+      "Cancelado",
+    ];
+
+    const resultados = {};
+
+    for (const estado of estados) {
+      const total = await prisma.trabajo.count({
+        where: { estado },
+      });
+      resultados[estado] = total;
+    }
+
+    res.json(resultados);
+  } catch (error) {
+    console.error("Error al contar trabajos por estado:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+

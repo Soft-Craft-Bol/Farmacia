@@ -23,28 +23,28 @@ const CalendarioMantenimientos = () => {
         if (currentUser.roles[0] === 'Administrador') {
           const response = await getTrababjosPendienteRechazado();
           const trabajosAdmin = response.data?.data || [];
-          
+
           setTrabajos(trabajosAdmin.map(trabajo => {
-  const fechaInicio = trabajo.fechaInicio ? new Date(trabajo.fechaInicio) : new Date();
-  const fechaFin = trabajo.fechaFin ? new Date(trabajo.fechaFin) : fechaInicio; // si no tiene fin, usar inicio
-  return {
-    ...trabajo,
-    fechaInicio,
-    fechaFin
-  };
-}));
+            const fechaInicio = trabajo.fechaInicio ? new Date(trabajo.fechaInicio) : new Date();
+            const fechaFin = trabajo.fechaFin ? new Date(trabajo.fechaFin) : fechaInicio; // si no tiene fin, usar inicio
+            return {
+              ...trabajo,
+              fechaInicio,
+              fechaFin
+            };
+          }));
 
         } else if (currentUser.idUser) {
           const response = await getTrabajosByUser(currentUser.idUser);
           const asignaciones = response?.data?.asignaciones || [];
-          
+
           const trabajosAsignados = asignaciones.map(asignacion => ({
             ...(asignacion.trabajo || {}),
             fechaInicio: asignacion.fechaInicio,
             fechaFin: asignacion.fechaFin,
             asignacionId: asignacion.id
           })).filter(trabajo => trabajo.id);
-          
+
           setTrabajos(trabajosAsignados);
         }
       } catch (error) {
@@ -52,7 +52,7 @@ const CalendarioMantenimientos = () => {
       }
     };
     fetchTrabajos();
-  }, [currentUser]);
+  }, []);
 
   // Convertir trabajos a eventos para el calendario
   const eventos = trabajos.map(trabajo => ({
@@ -71,8 +71,8 @@ const CalendarioMantenimientos = () => {
   const eventStyleGetter = (event) => {
     let backgroundColor = '';
     let borderColor = '';
-    
-    switch(event.estado) {
+
+    switch (event.estado) {
       case 'Pendiente':
         backgroundColor = '#FFC107'; // Amarillo
         borderColor = '#E0A800';
@@ -85,15 +85,11 @@ const CalendarioMantenimientos = () => {
         backgroundColor = '#4CAF50'; // Verde
         borderColor = '#3D8B40';
         break;
-      case 'Rechazado':
-        backgroundColor = '#F44336'; // Rojo
-        borderColor = '#D32F2F';
-        break;
       default:
         backgroundColor = '#9E9E9E'; // Gris
         borderColor = '#757575';
     }
-    
+
     return {
       style: {
         backgroundColor,
@@ -117,7 +113,7 @@ const CalendarioMantenimientos = () => {
   return (
     <div className="calendar-container">
       <h2>Calendario de Mantenimientos</h2>
-      
+
       <div className="user-info">
         <p>
           {currentUser.roles[0] === 'Administrador'
@@ -137,27 +133,31 @@ const CalendarioMantenimientos = () => {
         />
         <p>Total trabajos: {trabajos.length}</p>
       </div>
-      
+
       <div className="calendar-legend">
         {currentUser.roles[0] === 'Administrador' ? (
           <>
             <div className="legend-item">
-              <span className="legend-color" style={{backgroundColor: '#FFC107'}}></span>
+              <span className="legend-color" style={{ backgroundColor: '#FFC107' }}></span>
               <span>Pendiente</span>
             </div>
+             <div className="legend-item">
+              <span className="legend-color" style={{ backgroundColor: '#2196F3' }}></span>
+              <span>En Progreso</span>
+            </div>
             <div className="legend-item">
-              <span className="legend-color" style={{backgroundColor: '#F44336'}}></span>
-              <span>Rechazado</span>
+              <span className="legend-color" style={{ backgroundColor: '#4CAF50' }}></span>
+              <span>Finalizado</span>
             </div>
           </>
         ) : (
           <>
             <div className="legend-item">
-              <span className="legend-color" style={{backgroundColor: '#2196F3'}}></span>
+              <span className="legend-color" style={{ backgroundColor: '#2196F3' }}></span>
               <span>En Progreso</span>
             </div>
             <div className="legend-item">
-              <span className="legend-color" style={{backgroundColor: '#4CAF50'}}></span>
+              <span className="legend-color" style={{ backgroundColor: '#4CAF50' }}></span>
               <span>Finalizado</span>
             </div>
           </>

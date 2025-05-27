@@ -11,6 +11,7 @@ const EquiposTable = ({ data, onDelete }) => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [selectedEquipo, setSelectedEquipo] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+    const [tipoFilter, setTipoFilter] = useState('todos');
 
   const columns = [
     {
@@ -45,6 +46,7 @@ const EquiposTable = ({ data, onDelete }) => {
     },
     { header: 'Proveedor', accessor: 'proveedor' },
     { header: 'Orden', accessor: 'numeroOrden' },
+    { header: 'Tipo de Equipo', accessor: 'tipoEquipo' },
     {
       header: 'Acciones',
       accessor: 'id',
@@ -77,6 +79,12 @@ const EquiposTable = ({ data, onDelete }) => {
 
   const filteredData = useMemo(() => {
     return data.filter((equipo) => {
+      // Primero filtramos por tipo de equipo
+      if (tipoFilter !== 'todos' && equipo.tipoEquipo !== tipoFilter) {
+        return false;
+      }
+      
+      // Luego aplicamos el filtro de búsqueda
       const term = searchTerm.toLowerCase();
       return (
         equipo.etiquetaActivo?.toLowerCase().includes(term) ||
@@ -87,7 +95,7 @@ const EquiposTable = ({ data, onDelete }) => {
         equipo.tipoMantenimiento?.toLowerCase().includes(term)
       );
     });
-  }, [data, searchTerm]);
+  }, [data, searchTerm, tipoFilter]);
 
   const sortedData = useMemo(() => {
     let sortableData = [...filteredData];
@@ -141,19 +149,48 @@ const EquiposTable = ({ data, onDelete }) => {
 
   return (
     <div className="table-container">
-      <button className="add-equipo-btn" onClick={() => navigate('/equipos/register')}>
-        <FiPlusCircle /> Agregar Equipo
-      </button>
+      <div className="table-header-controls">
+        <button className="add-equipo-btn" onClick={() => navigate('/equipos/register')}>
+          <FiPlusCircle /> Agregar Equipo
+        </button>
 
-      <div className="search-bar">
-        <input
-          type="text"
-          placeholder="Buscar por etiqueta, modelo, ubicación..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-        />
+        <div className="filters-container">
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Buscar por etiqueta, modelo, ubicación..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+
+          <div className="tipo-filter-switch">
+            <label>Filtrar por tipo:</label>
+            <div className="switch-options">
+              <button
+                className={`switch-option ${tipoFilter === 'todos' ? 'active' : ''}`}
+                onClick={() => setTipoFilter('todos')}
+              >
+                Todos
+              </button>
+              <button
+                className={`switch-option ${tipoFilter === 'Informatico' ? 'active' : ''}`}
+                onClick={() => setTipoFilter('Informatico')}
+              >
+                Informáticos
+              </button>
+              <button
+                className={`switch-option ${tipoFilter === 'Biomedico' ? 'active' : ''}`}
+                onClick={() => setTipoFilter('Biomedico')}
+              >
+                Biomédicos
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+
 
       <table className="equipos-table">
         <thead>

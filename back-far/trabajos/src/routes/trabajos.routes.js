@@ -11,9 +11,15 @@ const {
   updateEstadoTrabajo,
   aceptarTrabajo,
   rechazarTrabajo,
+  contarTrabajos,
+  contarTrabajosPendientes,
+  contarTrabajosPorEstado
 } = require('../controllers/trabajos.controller.js');
 
 router.post('/', upload.single('imagen'), createTrabajo);
+router.get('/contar', contarTrabajos);
+router.get('/contar/pendientes', contarTrabajosPendientes);
+router.get('/contar/estado', contarTrabajosPorEstado);
 
 router.post('/:trabajoId/equipos', addUsersToTrabajo);
 

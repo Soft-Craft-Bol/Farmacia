@@ -13,7 +13,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true
 }));
-app.use(bodyParser.json());
+app.use(express.json());
 
 
 app.use(express.json());

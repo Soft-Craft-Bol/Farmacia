@@ -6,7 +6,8 @@ const {
   asignarTrabajosMasivos, 
   finalizarTrabajoTecnico, 
   getCargaTecnico,
-  getTrabajosEnProgresoYRechazados
+  getTrabajosEnProgresoYRechazados,
+  getTrabajosFinalizadosConHistorial
 } = require('../controllers/tecnicoTrabajo.controller');
 
 const handleFileUploads = (req, res, next) => {
@@ -32,5 +33,6 @@ router.put(
 );
 router.get('/carga/:tecnicoId', getCargaTecnico);
 router.get('/pendientes', getTrabajosEnProgresoYRechazados);
+router.get('/historial', getTrabajosFinalizadosConHistorial);
 
 module.exports = router;

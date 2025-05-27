@@ -1,18 +1,24 @@
 module.exports = {
- calcularProximoMantenimiento: (fechaReferencia, periodoMeses) => {
-  const fecha = new Date(fechaReferencia);
-  if (isNaN(fecha.getTime())) {
-    throw new Error('Fecha de referencia inválida');
-  }
+  calcularProximoMantenimiento: (fechaReferencia, periodoMeses) => {
+    // Asegurarnos de que la fecha de referencia es un objeto Date válido
+    const fecha = new Date(fechaReferencia);
+    if (isNaN(fecha.getTime())) {
+      throw new Error('Fecha de referencia inválida');
+    }
 
-  // Crear nueva fecha para no modificar la original
-  const nuevaFecha = new Date(fecha);
-  
-  // Sumar los meses directamente (Date maneja el desbordamiento de meses)
-  nuevaFecha.setMonth(nuevaFecha.getMonth() + parseInt(periodoMeses));
-  
-  return nuevaFecha;
-},
+    const nuevaFecha = new Date(fecha);
+    
+    const mesActual = nuevaFecha.getMonth();
+    const nuevoMes = mesActual + parseInt(periodoMeses);
+    
+    nuevaFecha.setFullYear(
+      nuevaFecha.getFullYear() + Math.floor(nuevoMes / 12),
+      nuevoMes % 12,
+      nuevaFecha.getDate()
+    );
+
+    return nuevaFecha;
+  },
 
   calcularDiasRestantes: (fechaFutura) => {
     const hoy = new Date();
