@@ -47,7 +47,8 @@ const registrarEquipo = async (req, res) => {
     // Ajuste en los nombres de campos para coincidir con el frontend
     const { 
       etiquetaActivo, numeroSerie, modelo, estado, ubicacion, tipoMantenimiento, 
-      fechaCompra, proveedor, numeroOrden, usuarioId, componentes
+      fechaCompra, proveedor, numeroOrden, usuarioId, componentes,
+      fechaInicioUso, periodoMantenimiento // Campos añadidos para el cálculo
     } = req.body;
 
     // Validación completa de campos obligatorios
@@ -92,6 +93,28 @@ const registrarEquipo = async (req, res) => {
       });
     }
 
+    // Función para calcular la próxima fecha de mantenimiento
+    const calcularProximoMantenimiento = (fechaInicio, periodo) => {
+      const periodoNum = parseInt(periodo);
+      if (isNaN(periodoNum) || periodoNum <= 0) return null;
+      
+      // Si no hay fecha de inicio, usamos la fecha actual
+      const fechaBase = fechaInicio ? new Date(fechaInicio) : new Date();
+      
+      const fechaMantenimiento = new Date(fechaBase);
+      fechaMantenimiento.setDate(fechaBase.getDate() + periodoNum);
+      
+      return fechaMantenimiento;
+    };
+
+    // Calcular la próxima fecha de mantenimiento
+    const proximoMantenimiento = calcularProximoMantenimiento(
+      fechaInicioUso, 
+      periodoMantenimiento
+    );
+
+     const fechaInicioUsoFinal = fechaInicioUso ? new Date(fechaInicioUso) : new Date();
+
     // Resto del código para manejar archivos y crear el equipo...
     const imagenes = req.files['imagenes'] || [];
     const documentos = req.files['documentos'] || [];
@@ -115,7 +138,7 @@ const registrarEquipo = async (req, res) => {
       componentesArray = [];
     }
 
-    console.log("Componentes parseados:", req.body.fechaInicio);
+    console.log("Componentes parseados:", componentesArray);
 
     const equipo = await prisma.equipo.create({
       data: {
@@ -125,19 +148,16 @@ const registrarEquipo = async (req, res) => {
         estado,
         ubicacion,
         tipoMantenimiento,
-        fechaInicioUso: req.body.fechaInicio ? new Date(req.body.fechaInicio) : null,
-        periodoMantenimiento: req.body.periodoMantenimiento ? parseInt(req.body.periodoMantenimiento) : null,
-        proximoMantenimiento: req.body.fechaInicioUso && req.body.periodoMantenimiento 
-      ? new Date(new Date(req.body.fechaInicioUso).setMonth(
-          new Date(req.body.fechaInicioUso).getMonth() + parseInt(req.body.periodoMantenimiento)
-        ))
-      : null,
+        fechaInicioUso: fechaInicioUsoFinal, 
+        periodoMantenimiento: periodoMantenimiento ? parseInt(periodoMantenimiento) : null,
+        proximoMantenimiento,
         fechaCompra: fechaCompra ? new Date(fechaCompra) : null,
         proveedor,
         numeroOrden,
         ...archivosData,
         tipoEquipo: req.body.tipoEquipo || 'Otro',
         userId: parseInt(usuarioId),
+        nombreUsuario: req.body.nombreUsuario || null,
         componentes: {
           create: componentesArray.map(componente => ({
             nombre: typeof componente === 'object' ? componente.nombre || '' : componente

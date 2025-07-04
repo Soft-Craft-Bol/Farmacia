@@ -48,6 +48,7 @@ model Equipo {
   componentes      ComponenteEquipo[]
   imagenes         ImagenEquipo[]
   documentos       DocumentoEquipo[]
+  
 }
 
 model HistorialMantenimiento {
@@ -62,6 +63,7 @@ model HistorialMantenimiento {
   tecnicoId   Int
   tecnicoNombre String
   createdAt   DateTime  @default(now())
+  parametrosPrediccion Json?
 }
 
 model ComponenteEquipo {

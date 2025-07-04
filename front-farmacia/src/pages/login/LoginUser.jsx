@@ -4,7 +4,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import "./LoginUser.css";
 import { loginUser } from "../../service/api";
-import { saveToken, saveUser } from "./authFuntions"; // Asegúrate de que funcionan bien
+import { savePermissions, saveToken, saveUser } from "./authFuntions"; // Asegúrate de que funcionan bien
 import ImagenesApp from "../../assets/ImagenesApp";
 import { ButtonPrimary } from "../../components/buttons/ButtonPrimary";
 
@@ -48,7 +48,10 @@ function LoginUser() {
         };
 
         saveUser(user);
-        localStorage.setItem("user", JSON.stringify(user)); // Guardar usuario en localStorage
+        localStorage.setItem("user", JSON.stringify(user));
+
+        savePermissions(result.data.permisos || []);
+        localStorage.setItem("permissions", JSON.stringify(result.data.permisos || []));
 
         navigate("/home");
       } else {

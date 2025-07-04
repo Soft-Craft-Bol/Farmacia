@@ -28,3 +28,16 @@ export const getUser = () => {
   const userDataString = Cookies.get('userData');
   return userDataString ? JSON.parse(userDataString) : null;
 };
+
+
+export const savePermissions = (permissions) => {
+  Cookies.set('userPermissions', JSON.stringify(permissions), {
+    expires: 1,
+    sameSite: 'Strict'
+  });
+};
+
+export const getPermissions = () => {
+  const permissionsString = Cookies.get('userPermissions');
+  return permissionsString ? JSON.parse(permissionsString) : [];
+};

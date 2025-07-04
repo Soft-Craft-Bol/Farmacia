@@ -97,7 +97,7 @@ const Cronograma = () => {
   return (
     <div className="cronograma-container">
       <div className="cronograma-header">
-        <h2>Cronograma de Mantenimientos</h2>
+        <h2>Cronograma de Mantenimientos Predictivos</h2>
         <div className="month-navigator">
           <button onClick={() => cambiarMes(-1)}>&lt; Anterior</button>
           <span>
@@ -127,7 +127,7 @@ const Cronograma = () => {
               
               {semanas.map((semana, semanaIndex) => {
                 const eventos = equiposArea.filter(e => 
-                  isDateInRange(e.proximoMantenimiento, semana.inicio, semana.fin)
+                  isDateInRange(e.proximoMantenimientoRegresion, semana.inicio, semana.fin)
                 );
                 
                 return (
@@ -144,10 +144,13 @@ const Cronograma = () => {
                           <small>Tipo: {equipo.tipoMantenimiento}</small>
                         </div>
                         <div className="evento-detalle">
-                          <small>Mant.: {formatDate(equipo.proximoMantenimiento)}</small>
+                          <small>Predicción: {formatDate(equipo.proximoMantenimientoRegresion)}</small>
                         </div>
-                        {equipo.necesitaMantenimiento && (
-                          <div className="evento-alerta">¡Necesita mantenimiento!</div>
+                        <div className="evento-detalle">
+                          <small>Días predichos: {equipo.diasPredichos}</small>
+                        </div>
+                        {equipo.diasParaProximo <= equipo.limiteInferior && (
+                          <div className="evento-alerta">¡Mantenimiento próximo!</div>
                         )}
                       </div>
                     ))}
