@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
-import { finalizarTrabajo, registrarHistorial } from "../../service/api";
+import { finalizarTrabajo, registrarHistorial, registerMantenimiento } from "../../service/api";
 import "./FinalizarTrabajoForm.css";
 
 const FinalizarTrabajoForm = ({ trabajoId, tecnicoId, onSuccess, onError }) => {
@@ -9,6 +9,14 @@ const FinalizarTrabajoForm = ({ trabajoId, tecnicoId, onSuccess, onError }) => {
         imagenes: []
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [equipoData, setEquipoData] = useState({
+        equipoId: '',
+        tipo: 'Preventivo',
+        descripcion: '',
+        horasUso: '',
+        estadoActual: 'En uso normal'
+    });
+    const [showEquipoFields, setShowEquipoFields] = useState(false);
 
     const formik = useFormik({
         initialValues: {
@@ -16,14 +24,16 @@ const FinalizarTrabajoForm = ({ trabajoId, tecnicoId, onSuccess, onError }) => {
             solucionAplicada: '',
             materialesUtilizados: '',
             horasTrabajadas: '',
-            recomendaciones: ''
+            recomendaciones: '',
+            registrarMantenimiento: false
         },
         onSubmit: async (values) => {
             setIsSubmitting(true);
 
             try {
+                // 1. Finalizar el trabajo
                 const formData = new FormData();
-
+                
                 // Agregar campos de texto
                 Object.entries(values).forEach(([key, value]) => {
                     formData.append(key, value);
@@ -31,22 +41,33 @@ const FinalizarTrabajoForm = ({ trabajoId, tecnicoId, onSuccess, onError }) => {
 
                 // Agregar archivos
                 files.documentos.forEach((file, index) => {
-                    formData.append(`documentos`, file); // O puedes usar `documentos[${index}]` si prefieres
+                    formData.append(`documentos`, file);
                 });
 
                 files.imagenes.forEach((file, index) => {
-                    formData.append(`imagenes`, file); // O puedes usar `imagenes[${index}]` si prefieres
+                    formData.append(`imagenes`, file);
                 });
 
                 // Agregar IDs
                 formData.append('trabajoId', trabajoId);
                 formData.append('tecnicoId', tecnicoId);
 
-                // Llamar al endpoint
-                const response = await finalizarTrabajo(trabajoId, tecnicoId, formData);
+                const trabajoResponse = await finalizarTrabajo(trabajoId, tecnicoId, formData);
 
-                onSuccess(response.data);
+                // 2. Registrar mantenimiento si está habilitado
+                if (values.registrarMantenimiento && equipoData.equipoId) {
+                    const mantenimientoData = {
+                        ...equipoData,
+                        tecnicoId,
+                        tecnicoNombre: "Técnico del sistema" // Puedes obtener el nombre real del usuario actual
+                    };
+
+                    await registerMantenimiento(mantenimientoData);
+                }
+
+                onSuccess(trabajoResponse.data);
             } catch (error) {
+                console.error("Error en el proceso:", error);
                 onError(error.response?.data || { message: 'Error al finalizar el trabajo' });
             } finally {
                 setIsSubmitting(false);
@@ -70,77 +91,95 @@ const FinalizarTrabajoForm = ({ trabajoId, tecnicoId, onSuccess, onError }) => {
         });
     };
 
+    const handleEquipoDataChange = (e) => {
+        const { name, value } = e.target;
+        setEquipoData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const toggleEquipoFields = () => {
+        setShowEquipoFields(!showEquipoFields);
+        formik.setFieldValue('registrarMantenimiento', !showEquipoFields);
+    };
+
     return (
         <div className="finalizar-trabajo-container">
             <h2>Finalizar Trabajo #{trabajoId}</h2>
 
             <form onSubmit={formik.handleSubmit}>
-                {/* Campo Observaciones */}
-                <div className="form-group">
-                    <label htmlFor="observaciones">Observaciones</label>
-                    <textarea
-                        id="observaciones"
-                        name="observaciones"
-                        className="form-control"
-                        onChange={formik.handleChange}
-                        value={formik.values.observaciones}
-                        required
-                    />
-                </div>
+                {/* Sección de finalización de trabajo */}
+                <div className="form-section">
+                    <h3>Información del Trabajo</h3>
+                    
+                    {/* Campo Observaciones */}
+                    <div className="form-group">
+                        <label htmlFor="observaciones">Observaciones</label>
+                        <textarea
+                            id="observaciones"
+                            name="observaciones"
+                            className="form-control"
+                            onChange={formik.handleChange}
+                            value={formik.values.observaciones}
+                            required
+                        />
+                    </div>
 
-                {/* Campo Solución Aplicada */}
-                <div className="form-group">
-                    <label htmlFor="solucionAplicada">Solución Aplicada</label>
-                    <input
-                        type="text"
-                        id="solucionAplicada"
-                        name="solucionAplicada"
-                        className="form-control"
-                        onChange={formik.handleChange}
-                        value={formik.values.solucionAplicada}
-                        required
-                    />
-                </div>
+                    {/* Campo Solución Aplicada */}
+                    <div className="form-group">
+                        <label htmlFor="solucionAplicada">Solución Aplicada</label>
+                        <input
+                            type="text"
+                            id="solucionAplicada"
+                            name="solucionAplicada"
+                            className="form-control"
+                            onChange={formik.handleChange}
+                            value={formik.values.solucionAplicada}
+                            required
+                        />
+                    </div>
 
-                {/* Campo Materiales Utilizados */}
-                <div className="form-group">
-                    <label htmlFor="materialesUtilizados">Materiales Utilizados</label>
-                    <input
-                        type="text"
-                        id="materialesUtilizados"
-                        name="materialesUtilizados"
-                        className="form-control"
-                        onChange={formik.handleChange}
-                        value={formik.values.materialesUtilizados}
-                        required
-                    />
-                </div>
+                    {/* Campo Materiales Utilizados */}
+                    <div className="form-group">
+                        <label htmlFor="materialesUtilizados">Materiales Utilizados</label>
+                        <input
+                            type="text"
+                            id="materialesUtilizados"
+                            name="materialesUtilizados"
+                            className="form-control"
+                            onChange={formik.handleChange}
+                            value={formik.values.materialesUtilizados}
+                            required
+                        />
+                    </div>
 
-                {/* Campo Horas Trabajadas */}
-                <div className="form-group">
-                    <label htmlFor="horasTrabajadas">Horas Trabajadas</label>
-                    <input
-                        type="number"
-                        step="0.1"
-                        id="horasTrabajadas"
-                        name="horasTrabajadas"
-                        className="form-control"
-                        onChange={formik.handleChange}
-                        value={formik.values.horasTrabajadas}
-                        required
-                    />
-                </div>
+                    {/* Campo Horas Trabajadas */}
+                    <div className="form-group">
+                        <label htmlFor="horasTrabajadas">Horas Trabajadas</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            id="horasTrabajadas"
+                            name="horasTrabajadas"
+                            className="form-control"
+                            onChange={formik.handleChange}
+                            value={formik.values.horasTrabajadas}
+                            required
+                        />
+                    </div>
 
-                {/* Campo Recomendaciones */}
-                <div className="form-group">
-                    <label htmlFor="recomendaciones">Recomendaciones</label>
-                    <textarea
-                        id="recomendaciones"
-                        name="recomendaciones"
-                        className="form-control"
-                        onChange={formik.handleChange}
-                        value={formik.values.recomendaciones}
-                    />
+                    {/* Campo Recomendaciones */}
+                    <div className="form-group">
+                        <label htmlFor="recomendaciones">Recomendaciones</label>
+                        <textarea
+                            id="recomendaciones"
+                            name="recomendaciones"
+                            className="form-control"
+                            onChange={formik.handleChange}
+                            value={formik.values.recomendaciones}
+                        />
+                    </div>
                 </div>
 
                 {/* Subida de Documentos */}
@@ -195,12 +234,109 @@ const FinalizarTrabajoForm = ({ trabajoId, tecnicoId, onSuccess, onError }) => {
                     </div>
                 </div>
 
+                {/* Checkbox para registrar mantenimiento */}
+                <div className="form-group checkbox-group">
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showEquipoFields}
+                            onChange={toggleEquipoFields}
+                        />
+                        Registrar mantenimiento de equipo asociado
+                    </label>
+                </div>
+
+                {/* Sección de registro de mantenimiento (condicional) */}
+                {showEquipoFields && (
+                    <div className="form-section equipo-section">
+                        <h3>Información del Mantenimiento</h3>
+                        
+                        {/* Campo ID del Equipo */}
+                        <div className="form-group">
+                            <label htmlFor="equipoId">ID del Equipo</label>
+                            <input
+                                type="text"
+                                id="equipoId"
+                                name="equipoId"
+                                className="form-control"
+                                onChange={handleEquipoDataChange}
+                                value={equipoData.equipoId}
+                                required={showEquipoFields}
+                            />
+                        </div>
+
+                        {/* Campo Tipo de Mantenimiento */}
+                        <div className="form-group">
+                            <label htmlFor="tipo">Tipo de Mantenimiento</label>
+                            <select
+                                id="tipo"
+                                name="tipo"
+                                className="form-control"
+                                onChange={handleEquipoDataChange}
+                                value={equipoData.tipo}
+                                required={showEquipoFields}
+                            >
+                                <option value="Preventivo">Preventivo</option>
+                                <option value="Correctivo">Correctivo</option>
+                                <option value="Predictivo">Predictivo</option>
+                                <option value="Garantía">Garantía</option>
+                            </select>
+                        </div>
+
+                        {/* Campo Descripción */}
+                        <div className="form-group">
+                            <label htmlFor="descripcion">Descripción</label>
+                            <textarea
+                                id="descripcion"
+                                name="descripcion"
+                                className="form-control"
+                                onChange={handleEquipoDataChange}
+                                value={equipoData.descripcion}
+                                required={showEquipoFields}
+                            />
+                        </div>
+
+                        {/* Campo Horas de Uso */}
+                        <div className="form-group">
+                            <label htmlFor="horasUso">Horas de Uso</label>
+                            <input
+                                type="number"
+                                id="horasUso"
+                                name="horasUso"
+                                className="form-control"
+                                onChange={handleEquipoDataChange}
+                                value={equipoData.horasUso}
+                                required={showEquipoFields}
+                            />
+                        </div>
+
+                        {/* Campo Estado Actual */}
+                        <div className="form-group">
+                            <label htmlFor="estadoActual">Estado Actual del Equipo</label>
+                            <select
+                                id="estadoActual"
+                                name="estadoActual"
+                                className="form-control"
+                                onChange={handleEquipoDataChange}
+                                value={equipoData.estadoActual}
+                                required={showEquipoFields}
+                            >
+                                <option value="En uso normal">En uso normal</option>
+                                <option value="En uso intensivo">En uso intensivo</option>
+                                <option value="En desuso">En desuso</option>
+                                <option value="En mantenimiento">En mantenimiento</option>
+                                <option value="Dañado">Dañado</option>
+                            </select>
+                        </div>
+                    </div>
+                )}
+
                 <button
                     type="submit"
                     className="btn-submit"
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? 'Finalizando...' : 'Finalizar Trabajo'}
+                    {isSubmitting ? 'Procesando...' : 'Finalizar y Registrar'}
                 </button>
             </form>
         </div>

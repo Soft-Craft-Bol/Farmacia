@@ -14,6 +14,7 @@ import { Toaster, toast } from "sonner";
 import Table from "../../components/table/Table";
 import { getTrabajos, deleteTrabajo } from "../../service/api";
 import { ButtonPrimary } from "../../components/buttons/ButtonPrimary";
+import LinkButton from "../../components/buttons/LinkButton";
 import "./TrabajoList.css";
 
 const TrabajoManagement = () => {
@@ -127,6 +128,10 @@ const TrabajoManagement = () => {
         >
           <FaPlus /> Nuevo Trabajo
         </button>
+        <div className="trabajo-management-header">
+        <h2 className="trabajo-management-title">Trabajos Pendientes</h2>
+        <LinkButton to={`/trabajos/pendientes`}>Gestionar pendientes</LinkButton>
+      </div>
       </div>
 
       <div className="section-controls">

@@ -58,7 +58,7 @@ const registrarMantenimiento = async (req, res) => {
     const factorEstado = factoresEstado[estadoActual] || 1.0;
 
     // 3. Modelo de Markov simple
-    const probabilidadFalla = await calcularProbabilidadFalla(equipo);
+    const probabilidadFalla = await calcularProbabilidadFalla(equipo, tipo);
     const factorMarkov = 1 + (0.5 - probabilidadFalla);
 
     // 4. Factor por horas de uso
@@ -146,8 +146,8 @@ const registrarMantenimiento = async (req, res) => {
   }
 };
 
-// Funciones auxiliares
-async function calcularProbabilidadFalla(equipo) {
+// Función auxiliar para el modelo de Markov
+async function calcularProbabilidadFalla(equipo, tipoNuevoMantenimiento) {
   const matrizMarkov = {
     'Preventivo': { Preventivo: 0.1, Correctivo: 0.3, Predictivo: 0.05 },
     'Correctivo': { Preventivo: 0.2, Correctivo: 0.5, Predictivo: 0.1 },
@@ -171,7 +171,7 @@ async function calcularProbabilidadFalla(equipo) {
   }[equipo.estado] || 1.0;
 
   // Probabilidad base según tipo de último mantenimiento
-  const probabilidadBase = matrizMarkov[tipoUltimo][tipo] || 0.1;
+  const probabilidadBase = matrizMarkov[tipoUltimo][tipoNuevoMantenimiento] || 0.1;
   
   return Math.min(0.9, probabilidadBase * factorEstado);
 }
