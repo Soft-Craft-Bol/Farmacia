@@ -79,7 +79,7 @@ export const getEquipoById = (id) => apiEquipos.get(`/equipos/${id}`);
 export const createEquipo = (data) => apiEquipos.post('/equipos', data);
 export const deleteEquipo = (id) => apiEquipos.delete(`/equipos/${id}`);
 export const updateEquipo = (id, data) => apiEquipos.put(`/equipos/${id}`, data);
-export const getProximoMantenimiento = () => apiEquipos.get('/mantenimiento');
+export const getProximoMantenimiento = () => apiEquipos.get('/mantenimiento/predicto');
 
 
 export const createTeam = (data) => apiUsers.post('/teams/create', data);
@@ -125,5 +125,8 @@ export const getHistorialFinalizados = () =>
 
 export const registrarHistorial = (data) =>
   apiEquipos.post('/mantenimiento/registrar', data);
+
+export const registerMantenimiento = (data) =>
+  apiEquipos.post('/seguiente', data);
 
 

@@ -33,6 +33,7 @@ async function obtenerEquiposConMantenimiento2(req, res) {
     const equipos = await prisma.equipo.findMany({
       select: {
         ultimoMantenimiento: true,
+        etiquetaActivo: true,
         proximoMantenimiento: true,
         horasUsoAcumuladas: true,
         userId: true,

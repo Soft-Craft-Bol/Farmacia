@@ -10,179 +10,200 @@ const fs = require('fs');
 
 // Configuración del transporter para nodemailer
 const transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD
-    }
-  });
+  service: process.env.EMAIL_SERVICE,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
+  }
+});
 
 
 
 exports.register = [
-    async (req, res) => {
-        console.log("Registro de usuario:", req.body);
-        try {
-            const { nombre, apellido, usuario, email, password, ci, profesion, roles, areas } = req.body;
+  async (req, res) => {
+    console.log("Registro de usuario:", req.body);
+    try {
+      const { nombre, apellido, usuario, email, password, ci, profesion, roles, areas } = req.body;
 
-            let imagenUrl = null;
+      let imagenUrl = null;
 
-            if (req.file) {
-                  // Si usas Cloudinary
-                  const result = await cloudinary.uploader.upload(req.file.path, {
-                    folder: 'users',
-                  });
-                  imagenUrl = result.secure_url;
-            
-                  // Elimina el archivo temporal
-                  fs.unlinkSync(req.file.path);
-                }
-          
-            const hashedPassword = await bcrypt.hash(password, 10);
+      if (req.file) {
+        // Si usas Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'users',
+        });
+        imagenUrl = result.secure_url;
 
-            // Asegura que roles y areas estén como arrays de números
-            const parsedRoles = Array.isArray(roles) ? roles.map(Number) : JSON.parse(roles);
-            const parsedAreas = Array.isArray(areas) ? areas.map(Number) : JSON.parse(areas);
+        // Elimina el archivo temporal
+        fs.unlinkSync(req.file.path);
+      }
 
-            // Validación de existencia
-            const foundRoles = await prisma.role.findMany({
-                where: { id: { in: parsedRoles } }
-            });
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-            const foundAreas = await prisma.area.findMany({
-                where: { id: { in: parsedAreas } }
-            });
+      // Asegura que roles y areas estén como arrays de números
+      const parsedRoles = Array.isArray(roles) ? roles.map(Number) : JSON.parse(roles);
+      const parsedAreas = Array.isArray(areas) ? areas.map(Number) : JSON.parse(areas);
 
-            if (foundRoles.length !== parsedRoles.length) {
-                fs.unlinkSync(req.file.path);
-                return res.status(400).json({ error: 'Uno o más roles no existen' });
-            }
+      // Validación de existencia
+      const foundRoles = await prisma.role.findMany({
+        where: { id: { in: parsedRoles } }
+      });
 
-            if (foundAreas.length !== parsedAreas.length) {
-                fs.unlinkSync(req.file.path);
-                return res.status(400).json({ error: 'Una o más áreas no existen' });
-            }
+      const foundAreas = await prisma.area.findMany({
+        where: { id: { in: parsedAreas } }
+      });
 
-            const user = await prisma.user.create({
-                data: {
-                    nombre,
-                    apellido,
-                    usuario,
-                    email,
-                    password: hashedPassword,
-                    ci,
-                    profesion,
-                    foto: imagenUrl,
-                    roles: {
-                        create: parsedRoles.map(roleId => ({
-                            role: { connect: { id: roleId } }
-                        }))
-                    },
-                    areas: {
-                        create: parsedAreas.map(areaId => ({
-                            area: { connect: { id: areaId } }
-                        }))
-                    }
-                },
-                include: {
-                    roles: { include: { role: true } },
-                    areas: { include: { area: true } }
-                }
-            });
+      if (foundRoles.length !== parsedRoles.length) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ error: 'Uno o más roles no existen' });
+      }
 
-            res.status(201).json(user);
-        } catch (error) {
-            if (req.file) fs.unlinkSync(req.file.path);
-            console.error("Error en registro:", error);
-            res.status(400).json({ error: error.message });
+      if (foundAreas.length !== parsedAreas.length) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ error: 'Una o más áreas no existen' });
+      }
+
+      const user = await prisma.user.create({
+        data: {
+          nombre,
+          apellido,
+          usuario,
+          email,
+          password: hashedPassword,
+          ci,
+          profesion,
+          foto: imagenUrl,
+          roles: {
+            create: parsedRoles.map(roleId => ({
+              role: { connect: { id: roleId } }
+            }))
+          },
+          areas: {
+            create: parsedAreas.map(areaId => ({
+              area: { connect: { id: areaId } }
+            }))
+          }
+        },
+        include: {
+          roles: { include: { role: true } },
+          areas: { include: { area: true } }
         }
+      });
+
+      res.status(201).json(user);
+    } catch (error) {
+      if (req.file) fs.unlinkSync(req.file.path);
+      console.error("Error en registro:", error);
+      res.status(400).json({ error: error.message });
     }
+  }
 ];
 
 
 // Obtener perfil de usuario
 exports.getProfile = async (req, res) => {
-    try {
-      const userId = parseInt(req.user.id);
-      if (isNaN(userId)) {
-          return res.status(400).json({ error: 'ID de usuario inválido' });
-      }
-
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-            roles: { include: { role: true } },
-            areas: { include: { area: true } }
-        }
-    });
-  
-        if (!user) {
-            return res.status(404).json({ error: 'Usuario no encontrado' });
-        }
-  
-        const response = {
-            id: user.id,
-            nombre: user.nombre,
-            apellido: user.apellido,
-            usuario: user.usuario,
-            email: user.email,
-            ci: user.ci,
-            profesion: user.profesion,
-            foto: user.foto,
-            roles: user.roles.map(r => r.role.nombre),
-            areas: user.areas.map(a => a.area.nombre),
-        };
-  
-        return res.json(response);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al obtener perfil' });
+  try {
+    const userId = parseInt(req.user.id);
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'ID de usuario inválido' });
     }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        roles: { include: { role: true } },
+        areas: { include: { area: true } }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const response = {
+      id: user.id,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      usuario: user.usuario,
+      email: user.email,
+      ci: user.ci,
+      profesion: user.profesion,
+      foto: user.foto,
+      roles: user.roles.map(r => r.role.nombre),
+      areas: user.areas.map(a => a.area.nombre),
+    };
+
+    return res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener perfil' });
+  }
 };
 
 // Iniciar sesión
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
-    
-    try {
-        // Buscar usuario por email
-        const user = await prisma.user.findUnique({
-            where: { email },
-            include: {
-                roles: { include: { role: true } },  // Incluir roles
+  const { email, password } = req.body;
+
+  try {
+    // Buscar usuario por email
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        roles: {
+          include: {
+            role: {
+              include: {
+                permisos: {
+                  include: {
+                    permission: true
+                  }
+                }
+              }
             }
-        });
+          }
+        },
+      }
+    });
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(400).json({ error: 'Credenciales incorrectas' });
-        }
 
-        // Generar token JWT
-        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        // Obtener nombre completo y roles del usuario
-        const fullName = `${user.nombre} ${user.apellido}`;
-        const roles = user.roles.map(userRole => userRole.role.nombre);
-        const photo = user.foto;
-
-        res.json({
-            token,
-            id: user.id,
-            usuario: user.usuario,
-            nombreCompleto: fullName,
-            roles: roles,
-            foto: photo
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(400).json({ error: 'Error al procesar la solicitud' });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ error: 'Credenciales incorrectas' });
     }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    const fullName = `${user.nombre} ${user.apellido}`;
+    const roles = user.roles.map(userRole => userRole.role.nombre);
+    const photo = user.foto;
+
+    const permisosSet = new Set();
+    user.roles.forEach(userRole => {
+      userRole.role.permisos.forEach(rp => {
+        permisosSet.add(rp.permission.nombre);
+      });
+    });
+    const permisos = Array.from(permisosSet);
+
+    res.json({
+      token,
+      id: user.id,
+      usuario: user.usuario,
+      nombreCompleto: fullName,
+      roles,
+      permisos, 
+      foto: photo
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Error al procesar la solicitud' });
+  }
 };
 
 // Obtener roles disponibles
 exports.getRoles = async (req, res) => {
-    const roles = await prisma.role.findMany();
-    res.json(roles);
+  const roles = await prisma.role.findMany();
+  res.json(roles);
 };
 
 
@@ -193,7 +214,7 @@ exports.getRoles = async (req, res) => {
 exports.requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     // Buscar usuario por email
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
