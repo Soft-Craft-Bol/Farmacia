@@ -1,6 +1,6 @@
 const prisma = require("../config/prisma");
 const upload = require('../config/multer');
-const cloudinary = require('../config/cloudinary'); 
+const cloudinary = require('../config/cloudinary');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
@@ -17,17 +17,27 @@ exports.getUserById = async (req, res) => {
     if (isNaN(userId)) {
         return res.status(400).json({ error: 'ID inválido' });
     }
-    
+
     try {
-        const user = await prisma.user.findUnique({ 
+        const user = await prisma.user.findUnique({
             where: { id: userId },
-            include: { 
+            include: {
                 roles: {
                     select: {
                         role: {
                             select: {
                                 id: true,
-                                nombre: true
+                                nombre: true,
+                                permisos: {
+                                    select: {
+                                        permission: {
+                                            select: {
+                                                id: true,
+                                                nombre: true
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -44,8 +54,7 @@ exports.getUserById = async (req, res) => {
                 }
             }
         });
-        
-        
+
         if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
         // Formatear la respuesta
@@ -64,14 +73,14 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.updateUser = [
-    upload.single('foto'), 
+    upload.single('foto'),
     async (req, res) => {
         console.log("Actualizando usuario con ID:", req.body);
         console.log("Datos de la solicitud:", req.params);
 
         console.log("Roles antes de parsear:", req.body.roles);
         console.log("Áreas antes de parsear:", req.body.areas);
-        
+
         const userId = parseInt(req.params.id);
         if (isNaN(userId)) {
             return res.status(400).json({ error: 'ID inválido' });
@@ -87,7 +96,7 @@ exports.updateUser = [
             }
 
             const roles = req.body.roles || [];  // Asegurarse de que roles sea un array válido
-            const areas = req.body.areas || []; 
+            const areas = req.body.areas || [];
 
             const userData = {
                 nombre: req.body.nombre,
@@ -104,13 +113,13 @@ exports.updateUser = [
 
             if (req.file) {
                 const existingUser = await prisma.user.findUnique({ where: { id: userId } });
-            
+
                 const result = await cloudinary.uploader.upload(req.file.path, {
                     folder: 'users',
                 });
-            
+
                 userData.foto = result.secure_url;
-            
+
                 if (existingUser.foto) {
                     const publicIdMatch = existingUser.foto.match(/\/users\/([^\.\/]+)\./);
                     if (publicIdMatch) {
@@ -118,7 +127,7 @@ exports.updateUser = [
                         await cloudinary.uploader.destroy(publicId);
                     }
                 }
-            
+
                 fs.unlinkSync(req.file.path);
             }
 
@@ -174,13 +183,13 @@ exports.updateUser = [
 
         } catch (error) {
             console.error("Error al actualizar usuario:", error);
-            
+
             // Limpiar imagen si se subió y ocurrió un error
             if (req.file && fs.existsSync(req.file.path)) {
                 fs.unlinkSync(req.file.path);
             }
 
-            res.status(500).json({ 
+            res.status(500).json({
                 error: "Error al actualizar usuario",
                 details: error.message
             });
@@ -191,17 +200,17 @@ exports.updateUser = [
 exports.deleteUser = async (req, res) => {
     console.log("Eliminando usuario con ID:", req.params.id);
     const userId = parseInt(req.params.id);
-    
+
     if (isNaN(userId)) {
         return res.status(400).json({ error: "ID inválido" });
     }
 
     try {
-        const user = await prisma.user.findUnique({ 
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             include: { roles: true, equipos: true }
         });
-        
+
         if (!user) {
             return res.status(404).json({ error: "Usuario no encontrado" });
         }
@@ -209,17 +218,17 @@ exports.deleteUser = async (req, res) => {
         // Eliminar primero las relaciones
         await prisma.userRole.deleteMany({ where: { userId } });
         await prisma.userTeam.deleteMany({ where: { userId } });
-        await prisma.userArea.deleteMany({ where: { userId } }); 
+        await prisma.userArea.deleteMany({ where: { userId } });
 
         // Luego eliminar el usuario
         await prisma.user.delete({ where: { id: userId } });
-        
+
         res.json({ message: "Usuario eliminado correctamente" });
     } catch (error) {
         console.error("Error al eliminar usuario:", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Error al eliminar usuario",
-            details: error.message 
+            details: error.message
         });
     }
 };
@@ -235,7 +244,7 @@ exports.getUsersByRole = async (req, res) => {
 
 exports.getUserNameById = async (req, res) => {
     const userId = req.params.id;
-    
+
     try {
         const user = await prisma.user.findUnique({
             where: { id: parseInt(userId) },
@@ -254,7 +263,7 @@ exports.getUserNameById = async (req, res) => {
         });
     } catch (error) {
         console.error("Error al obtener nombre de usuario:", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Error al obtener nombre de usuario",
             details: error.message
         });
@@ -296,9 +305,9 @@ exports.getUserWithEquipos = async (req, res) => {
         res.json(response);
     } catch (error) {
         console.error("Error al obtener usuario con equipos:", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Error al obtener usuario con equipos",
-            details: error.message 
+            details: error.message
         });
     }
 };
@@ -359,11 +368,11 @@ exports.getTecnicos = async (req, res) => {
 
 
 exports.contarUsuarios = async (req, res) => {
-  try {
-    const totalUsuarios = await prisma.user.count();
-    res.json({ total: totalUsuarios });
-  } catch (error) {
-    console.error("Error al contar usuarios:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
+    try {
+        const totalUsuarios = await prisma.user.count();
+        res.json({ total: totalUsuarios });
+    } catch (error) {
+        console.error("Error al contar usuarios:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
 };

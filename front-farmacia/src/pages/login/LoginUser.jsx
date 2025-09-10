@@ -31,7 +31,7 @@ function LoginUser() {
     try {
 
       const result = await loginUser(values);
-
+console.log(result)
       if (result && result.data && result.data.token) {
 
         // Guardar el token en localStorage

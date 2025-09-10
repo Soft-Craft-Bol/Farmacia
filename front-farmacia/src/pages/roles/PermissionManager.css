@@ -1,0 +1,159 @@
+/* PermissionManager.css */
+.permission-manager {
+  background-color: var(--sidebar-color);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: var(--tran-05);
+}
+
+.permission-manager h2 {
+  color: var(--primary-color);
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+.permission-creator {
+  background-color: rgba(245, 246, 250, 0.5);
+  padding: 20px;
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+
+.permission-creator h3 {
+  color: var(--text-color);
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.permission-creator form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.permission-creator input {
+  flex: 1;
+  min-width: 250px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: var(--sidebar-color);
+  color: var(--text-color);
+  transition: var(--tran-03);
+}
+
+.permission-creator input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(51, 179, 25, 0.2);
+}
+
+.permission-creator button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--tran-03);
+  min-height: 40px;
+}
+
+.permission-creator button:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+.permission-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background-color: var(--sidebar-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.permission-list th, 
+.permission-list td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.permission-list th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+}
+
+.permission-list tr:nth-child(even) {
+  background-color: rgba(245, 246, 250, 0.3);
+}
+
+.permission-list tr:hover {
+  background-color: rgba(51, 179, 25, 0.05);
+}
+
+.permission-list button.delete {
+  background-color: var(--color-5);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--tran-03);
+}
+
+.permission-list button.delete:hover {
+  background-color: #e04f4f;
+}
+
+/* Estilos para modo oscuro */
+body.dark .permission-manager {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark .permission-creator {
+  background-color: rgba(27, 36, 49, 0.5);
+}
+
+body.dark .permission-creator input {
+  background-color: var(--color-medium);
+  border-color: var(--color-medium);
+}
+
+body.dark .permission-list tr:nth-child(even) {
+  background-color: rgba(39, 49, 66, 0.5);
+}
+
+body.dark .permission-list tr:hover {
+  background-color: rgba(69, 226, 38, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .permission-creator form {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .permission-creator input,
+  .permission-creator button {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .permission-list {
+    overflow-x: auto;
+  }
+  
+  .permission-list table {
+    min-width: 600px;
+  }
+}
