@@ -10,7 +10,7 @@ import { RiUser2Fill } from "react-icons/ri";
 export default function UserProfile() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
-
+console.log(user);
   useEffect(() => {
     const token = localStorage.getItem("token");
 
