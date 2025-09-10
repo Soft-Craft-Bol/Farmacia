@@ -88,10 +88,22 @@ export const getTeamsWithUsers = () => apiUsers.get('/teams/teams-with-users');
 export const removeUserFromTeam = (teamId, userId) => apiUsers.delete(`/teams/remove-user/${teamId}/${userId}`);
 
 export const createRole = (data) => apiUsers.post("/auth/roles", data);
+
+export const getRoleById = (id) => apiUsers.get(`/auth/roles/${id}`);
+export const getPermissions = () => apiUsers.get("/auth/roles/permisos/list");
+//export const getPermissions = () => apiUsers.get('/auth/roles/permisos');
+export const createPermission = (data) => apiUsers.post("/auth/roles/permisos", data);
+export const deletePermission = (id) => apiUsers.delete(`/auth/roles/permisos/${id}`);
+
+export const assignRoleToUser = (data) => apiUsers.post("/auth/roles/assign", data);
+export const removeRoleFromUser = (data) => apiUsers.post("/auth/roles/remove", data);
+export const getUsersByRole = (roleId) => apiUsers.get(`/auth/roles/${roleId}/users`);
+
+
 export const deleteRole = (id) => apiUsers.delete(`/auth/roles/${id}`); 
-export const updateRole = (id, data) => apiUsers.put(`/auth/roles/${id}`, data); 
-export const assignRoleToUser = (userId, roleId) =>apiUsers.put(`/auth/assign-role/${userId}`, { roleId });
-export const getPermissions = () => apiUsers.get('/auth/roles/permisos');
+export const updateRole = (id, data) => apiUsers.put(`/auth/roles/${id}`, data);
+//export const assignRoleToUser = (userId, roleId) => apiUsers.put(`/auth/assign-role/${userId}`, { roleId });
+
 export const getTecnicos = () => apiUsers.get('/users/tecnicos');
 
 

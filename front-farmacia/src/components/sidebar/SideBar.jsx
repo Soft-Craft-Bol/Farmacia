@@ -43,7 +43,7 @@ const SidebarHeader = ({ onToggle, isOpen }) => {
           alt="Perfil"
         />
         <span className="name">
-          <i>Bienvenido {current.full_name}</i>
+          <i>{current.full_name}</i>
         </span>
         <span className="profe">{current.roles[0] || "Usuario"}</span>
       </div>

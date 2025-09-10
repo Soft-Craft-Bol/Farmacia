@@ -1,0 +1,139 @@
+/* RoleForm.css */
+.role-form {
+  background-color: var(--sidebar-color);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  transition: var(--tran-03);
+}
+
+.role-form h2 {
+  color: var(--primary-color);
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+.role-form .form-group {
+  margin-bottom: 20px;
+}
+
+.role-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.role-form input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: var(--sidebar-color);
+  color: var(--text-color);
+  transition: var(--tran-03);
+}
+
+.role-form input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(51, 179, 25, 0.2);
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: rgba(245, 246, 250, 0.5);
+  border-radius: 4px;
+  transition: var(--tran-03);
+  cursor: pointer;
+}
+
+.permission-item:hover {
+  background-color: rgba(51, 179, 25, 0.1);
+}
+
+.permission-item input {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--tran-03);
+}
+
+.form-actions button[type="button"] {
+  background-color: var(--toggle-color);
+  color: white;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: var(--text-color-secundary);
+}
+
+.form-actions button[type="submit"] {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+/* Estilos para modo oscuro */
+body.dark .role-form {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark input[type="text"] {
+  background-color: var(--color-medium);
+  border-color: var(--color-medium);
+  color: var(--text-color);
+}
+
+body.dark .permission-item {
+  background-color: rgba(39, 49, 66, 0.5);
+}
+
+body.dark .permission-item:hover {
+  background-color: rgba(69, 226, 38, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .permissions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,144 @@
+/* UserRoleAssignment.css */
+.user-role-assignment {
+  background-color: var(--sidebar-color);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  transition: var(--tran-03);
+}
+
+.user-role-assignment h2 {
+  color: var(--primary-color);
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+.user-role-assignment h3 {
+  color: var(--text-color);
+  margin: 15px 0;
+  font-size: 1.2rem;
+}
+
+.assignment-form {
+  background-color: rgba(245, 246, 250, 0.5);
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: var(--sidebar-color);
+  color: var(--text-color);
+  transition: var(--tran-03);
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(51, 179, 25, 0.2);
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--tran-03);
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  background-color: var(--text-color-secundary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+button.delete {
+  background-color: var(--color-5);
+}
+
+button.delete:hover {
+  background-color: #e04f4f;
+}
+
+.assigned-users {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background-color: var(--sidebar-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+}
+
+tr:nth-child(even) {
+  background-color: rgba(245, 246, 250, 0.3);
+}
+
+tr:hover {
+  background-color: rgba(51, 179, 25, 0.05);
+}
+
+/* Estilos para el modo oscuro */
+body.dark .user-role-assignment {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark .assignment-form {
+  background-color: rgba(27, 36, 49, 0.5);
+}
+
+body.dark .form-group select {
+  background-color: var(--color-medium);
+  border-color: var(--color-medium);
+  color: var(--text-color);
+}
+
+body.dark tr:nth-child(even) {
+  background-color: rgba(39, 49, 66, 0.5);
+}
+
+body.dark tr:hover {
+  background-color: rgba(69, 226, 38, 0.05);
+}
